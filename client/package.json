@@ -2,18 +2,19 @@
   "name": "@dhaul/client",
   "version": "0.1.0",
   "private": true,
-  "description": "Dungeon Haul client — Phaser 3 + Vite. P0: boot clear-color scene at 960x540 only.",
+  "description": "Dungeon Haul client — Phaser 3 + Vite. P2: dev create/join UI + netcode (prediction/interpolation/reconnect) rendering 4 haulers on box_level.",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc -p tsconfig.json --noEmit && vite build",
     "preview": "vite preview",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "lint": "eslint src"
+    "lint": "eslint src test",
+    "test": "vitest run"
   },
   "dependencies": {
+    "@colyseus/sdk": "^0.17.43",
     "@dhaul/protocol": "workspace:*",
-    "colyseus.js": "^0.16.22",
     "phaser": "^3.90.0"
   },
   "devDependencies": {
