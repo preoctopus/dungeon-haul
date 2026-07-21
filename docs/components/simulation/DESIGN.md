@@ -4,7 +4,7 @@
 |---|---|
 | Component | **C-06 Authoritative Simulation** |
 | Ownership | **SE-5** (primary); integrates SE-6 Rules, SE-8 AI, SE-7 Levels, C-10 Fork |
-| Status | Design (documentation only) |
+| Status | **Implemented P2–P3** (`server/src/sim/`); P4 phase machine / end scoring still open |
 | Related | [ARCHITECTURE.md](../../ARCHITECTURE.md) §6–8, [COMPONENTS.md](../../COMPONENTS.md) C-06, [ADR-002](../../decisions/ADR-002-multiplayer-netcode.md) |
 | Contracts | [netcode-messages.md](../../interfaces/netcode-messages.md), [input-commands.md](../../interfaces/input-commands.md), [share-modifier-api.md](../../interfaces/share-modifier-api.md), [level-format.md](../../interfaces/level-format.md) |
 | Product locks | [ARCHITECT-OPEN-QUESTIONS.md](../../decisions/ARCHITECT-OPEN-QUESTIONS.md) Q4-A, Q8-A, Q10-A |

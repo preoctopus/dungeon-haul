@@ -4,7 +4,7 @@
 |---|---|
 | Component | **C-04 Netcode Client** |
 | Ownership | **SE-3** (with C-03 Input Mapper) |
-| Status | Design (documentation only; no application code) |
+| Status | **Implemented P2** — `client/src/net/` (session, prediction, interpolation, reconnect) |
 | Contracts | [netcode-messages.md](../../interfaces/netcode-messages.md), [input-commands.md](../../interfaces/input-commands.md), [lobby-and-scores.md](../../interfaces/lobby-and-scores.md) |
 | Architecture | [ARCHITECTURE.md](../../ARCHITECTURE.md) §6; [ADR-002](../../decisions/ADR-002-multiplayer-netcode.md) |
 | Frozen product choices | Q2-A private codes; Q3-A online seats; Q10-A no global pause |

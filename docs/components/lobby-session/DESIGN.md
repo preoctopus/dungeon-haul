@@ -4,7 +4,7 @@
 |---|---|
 | Component | **C-05 Lobby & Session Service** |
 | Ownership | **SE-4** |
-| Status | Design (documentation only) |
+| Status | **Implemented P2** — `server/src/lobby/` REST + room seat tokens |
 | Contract | [lobby-and-scores.md](../../interfaces/lobby-and-scores.md), [netcode-messages.md](../../interfaces/netcode-messages.md) |
 | ADRs | [ADR-001](../../decisions/ADR-001-tech-stack.md), [ADR-002](../../decisions/ADR-002-multiplayer-netcode.md) |
 | Frozen decisions | Q2 private codes only; Q6 Fly.io; Q7 no accounts; Q9 soft-unique characters |

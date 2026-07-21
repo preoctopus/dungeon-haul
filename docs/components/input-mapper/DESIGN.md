@@ -4,7 +4,7 @@
 |---|---|
 | Component | **C-03 Input Mapper** |
 | Ownership | **SE-3** (with C-04 Netcode Client) |
-| Status | Design (documentation only; no application code) |
+| Status | **Partial P2** — level keyboard scheme in `client/src/net/inputMapper.ts`; full schemes (fork/end/gamepad) open |
 | Contracts | [input-commands.md](../../interfaces/input-commands.md), [netcode-messages.md](../../interfaces/netcode-messages.md) |
 | Architecture | [ARCHITECTURE.md](../../ARCHITECTURE.md) §6, §8; [COMPONENTS.md](../../COMPONENTS.md) C-03 |
 | Frozen product choices | [ARCHITECT-OPEN-QUESTIONS.md](../../decisions/ARCHITECT-OPEN-QUESTIONS.md) — Q3 **A** online seats first; local multi-gamepad **stretch** |

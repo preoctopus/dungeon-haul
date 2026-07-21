@@ -2,7 +2,8 @@
 
 > **Component ID:** C-08  
 > **Ownership:** SE-8  
-> **Status:** Documentation only (no application code)  
+> **Status:** **Implemented P3** — pure package `packages/ai` (`decide` + helpers); wired from `server/src/sim/simulation.ts`. Fork/Instructions phase policy completes with P4.  
+
 > **Sources:** Design doc §2.1 Drop-in / AI Players; [ARCHITECTURE.md](../../ARCHITECTURE.md) §6.4; [COMPONENTS.md](../../COMPONENTS.md) C-08; [input-commands.md](../../interfaces/input-commands.md)
 
 ---
@@ -367,16 +368,14 @@ Live-tunable via server config for playtests (Session C in implementation plan).
 
 ---
 
-## 12. File / package placement (future code)
-
-Suggested (when implementation starts — not created now):
+## 12. File / package placement
 
 ```text
-packages/ai/           # pure decide() + helpers (optional package)
-server/src/ai/         # AiController wiring to room
+packages/ai/              # pure decide() + helpers (shipped)
+server/src/sim/           # builds AiWorldView; stamps seq; applies cmds
 ```
 
-Prefer pure package if client ever needs offline AI; MVP may live under `server/src/ai` only.
+Room does not call AI directly — the simulation injects AI inputs each tick when `control == ai` and `enableAi` is true.
 
 ---
 

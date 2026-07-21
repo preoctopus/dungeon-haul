@@ -1,8 +1,21 @@
 # Dungeon Haul — Implementation Plan
 
-Documentation phase complete → build proceeds in **vertical slices** with online multiplayer as a first-class constraint. No application code in this document; it only sequences work.
+Build proceeds in **vertical slices** with online multiplayer as a first-class constraint. This document sequences work and tracks phase status; design contracts live under `docs/components/` and `docs/interfaces/`.
 
 Related: [ARCHITECTURE.md](ARCHITECTURE.md), [COMPONENTS.md](COMPONENTS.md), [interfaces/OVERVIEW.md](interfaces/OVERVIEW.md).
+
+### Status snapshot (keep in sync with code)
+
+| Phase | Status | Evidence |
+|---|---|---|
+| **P0** Foundations | **Done** | Monorepo builds; Vitest green |
+| **P1** Rules & content kernel | **Done** | `packages/rules`, `packages/levels` |
+| **P2** MVP netcode slice | **Done** | [testing/reports/P2-DEMO.md](testing/reports/P2-DEMO.md) |
+| **P3** Core gameplay systems | **Done** | [testing/reports/P3-GAMEPLAY.md](testing/reports/P3-GAMEPLAY.md) |
+| **P4** Full game flow shell | Not started | — |
+| **P5** Persistence & hardening | Not started | — |
+| **P6** Content expansion | Partial (art assets exist; sim/content wiring later) | [art/ASSET-STATUS.md](art/ASSET-STATUS.md) |
+| **P7** Stretch | Not started | — |
 
 ---
 
@@ -18,16 +31,16 @@ Related: [ARCHITECTURE.md](ARCHITECTURE.md), [COMPONENTS.md](COMPONENTS.md), [in
 
 ## 1. Phase overview
 
-| Phase | Name | Goal | Exit criteria |
-|---|---|---|---|
-| **P0** | Foundations | Monorepo, CI, protocol stubs, rules skeleton | CI green; packages build |
-| **P1** | Rules & content kernel | Pure scoring + level parse + 1 map | Unit tests cover shares + parser |
-| **P2** | MVP netcode slice | Authoritative room, movement, 2–4 clients | Two browsers jump on shared level |
-| **P3** | Core gameplay loop | Treasure, weight, spill, traps(subset), AI | Steal/spill feels fair; AI keeps pace |
-| **P4** | Flow shell | Lobby, Instructions, Hoard, Fork, End | Full short run online |
-| **P5** | Persistence & meta | High scores, reconnect polish | Scores survive deploy |
-| **P6** | Content expansion | More levels/traps/biomes | Design path density |
-| **P7** | Stretch | Couch hybrid, spectators, 60 Hz, matchmaking | Optional |
+| Phase | Name | Goal | Exit criteria | Status |
+|---|---|---|---|---|
+| **P0** | Foundations | Monorepo, CI, protocol stubs, rules skeleton | CI green; packages build | **Done** |
+| **P1** | Rules & content kernel | Pure scoring + level parse + 1 map | Unit tests cover shares + parser | **Done** |
+| **P2** | MVP netcode slice | Authoritative room, movement, 2–4 clients | Two browsers jump on shared level | **Done** |
+| **P3** | Core gameplay loop | Treasure, weight, spill, traps(subset), AI | Steal/spill feels fair; AI keeps pace | **Done** |
+| **P4** | Flow shell | Lobby, Instructions, Hoard, Fork, End | Full short run online | Next |
+| **P5** | Persistence & meta | High scores, reconnect polish | Scores survive deploy | Pending |
+| **P6** | Content expansion | More levels/traps/biomes | Design path density | Art ahead of code |
+| **P7** | Stretch | Couch hybrid, spectators, 60 Hz, matchmaking | Optional | Pending |
 
 ---
 
@@ -35,12 +48,14 @@ Related: [ARCHITECTURE.md](ARCHITECTURE.md), [COMPONENTS.md](COMPONENTS.md), [in
 
 ### P0 — Foundations (Week-scale: short)
 
+**Status:** **Done**
+
 **Work**
-- pnpm monorepo: `client`, `server`, `packages/protocol`, `packages/rules`
+- pnpm monorepo: `client`, `server`, `packages/protocol`, `packages/rules` (+ later levels/ai)
 - TypeScript strict, ESLint, Vitest (or equivalent)
 - Dockerfiles (server + static client)
 - CI: install, test, build
-- Protocol v0 message stubs (`InputCommand`, `WorldSnapshot`, join/leave)
+- Protocol v0 message stubs (`InputCommand`, `WorldSnapshot`, join/leave) → v1 freeze in P2
 - Health endpoint
 
 **Owners:** SE-3/4/5 skeleton; all review protocol.
@@ -50,6 +65,8 @@ Related: [ARCHITECTURE.md](ARCHITECTURE.md), [COMPONENTS.md](COMPONENTS.md), [in
 ---
 
 ### P1 — Rules & content kernel
+
+**Status:** **Done**
 
 **Work**
 - Treasure catalog from design §2.2 (data tables)
@@ -61,11 +78,13 @@ Related: [ARCHITECTURE.md](ARCHITECTURE.md), [COMPONENTS.md](COMPONENTS.md), [in
 
 **Owners:** SE-6 (rules), SE-7 (levels)
 
-**Exit:** `pnpm test` proves `min shares = 1`, set bonuses, sample haul payouts match expected fixtures.
+**Exit:** `pnpm test` proves `min shares = 1`, set bonuses, sample haul payouts match expected fixtures. Met via `packages/rules` + `packages/levels` suites.
 
 ---
 
 ### P2 — MVP netcode slice ⭐ critical path
+
+**Status:** **Done** — [testing/reports/P2-DEMO.md](testing/reports/P2-DEMO.md)
 
 **Work**
 - Colyseus (or chosen room host) `HaulSession`
@@ -79,12 +98,14 @@ Related: [ARCHITECTURE.md](ARCHITECTURE.md), [COMPONENTS.md](COMPONENTS.md), [in
 **Owners:** SE-3, SE-4, SE-5
 
 **Exit criteria**
-- [ ] 2 humans on different machines (or browsers) share positions
-- [ ] Kill network tab → reconnect restores seat within grace
-- [ ] Third/fourth seats AI or empty-controlled without crashing
-- [ ] Tick lag metric logged
+- [x] 2 humans on different machines (or browsers) share positions
+- [x] Kill network tab → reconnect restores seat within grace
+- [x] Third/fourth seats AI or empty-controlled without crashing
+- [x] Tick lag metric logged
 
-**Explicitly out of P2:** treasure, traps, end scoring UI, art.
+**Status:** **Done** — see [testing/reports/P2-DEMO.md](testing/reports/P2-DEMO.md).
+
+**Explicitly out of P2:** treasure, traps, end scoring UI, art (those moved to P3 / art track).
 
 ---
 
@@ -102,7 +123,20 @@ Related: [ARCHITECTURE.md](ARCHITECTURE.md), [COMPONENTS.md](COMPONENTS.md), [in
 
 **Owners:** SE-5 core, SE-8 AI, SE-6 hooks, SE-2 present events
 
-**Exit:** Chaos playtest “loot goblin” session notes filed under `docs/testing/` (later).
+**Exit criteria (code)**
+- [x] Pickup / drop / throw + dual-seat ownership invariant
+- [x] Encumbrance slowdown after free-item threshold
+- [x] Stun → spill + lockout; peer can steal
+- [x] Trip/push impulse + stats
+- [x] Spikes + lightning cycle; other traps stub safely
+- [x] Switches (regular + heavy mass)
+- [x] Ice / sand surface modifiers
+- [x] C-08 pure AI flock / loot cap / switch / stuck (`packages/ai`)
+- [x] Headless gameplay + AI unit tests green
+- [ ] Human “loot goblin” chaos playtest notes under `docs/testing/reports/` (optional session)
+
+**Status:** **Done** (code + automated tests) — see [testing/reports/P3-GAMEPLAY.md](testing/reports/P3-GAMEPLAY.md).  
+Dev client draws free treasure / carry HUD from game atlases; full C-02 presentation remains P4+.
 
 ---
 

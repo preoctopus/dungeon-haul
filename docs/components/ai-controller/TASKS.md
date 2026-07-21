@@ -6,18 +6,18 @@
 > **Design:** [DESIGN.md](DESIGN.md)  
 > **Depends on frozen contracts:** [input-commands.md](../../interfaces/input-commands.md), sim view from C-06
 
-Documentation / planning tasks only in this phase. Implementation tasks are sequenced for when code work starts; no application code is produced here.
+Implementation status (update with code): **P3 pure AI shipped** in `packages/ai`; P4 phase/fork policies still open.
 
 ---
 
 ## Phase alignment
 
-| Plan phase | AI work |
-|---|---|
-| **P2** | Idle stand / neutral AI inputs so 4 seats exist |
-| **P3** | Full behavior stack (flock, greed, cap, switches) |
-| **P4** | Phase gating (no AI on Instructions); Fork argue policy |
-| **P6** | Playtest tuning / balance |
+| Plan phase | AI work | Status |
+|---|---|---|
+| **P2** | Idle stand / neutral AI inputs so 4 seats exist | Superseded by P3 decide |
+| **P3** | Full behavior stack (flock, greed, cap, switches) | **Done** (`packages/ai`) |
+| **P4** | Phase gating (no AI on Instructions); Fork argue policy | Pending |
+| **P6** | Playtest tuning / balance | Pending |
 
 ---
 
@@ -226,6 +226,7 @@ Documentation / planning tasks only in this phase. Implementation tasks are sequ
 **Goal:** When code lands, update DESIGN with actual paths and exported symbols.  
 **Phase:** First implementation PR  
 **Depends on:** C08-T03+  
+**Status:** Done (DESIGN §12 + `packages/ai` exports)  
 **Acceptance:**
 
 - [ ] DESIGN §12 matches repo  

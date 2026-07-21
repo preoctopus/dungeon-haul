@@ -4,7 +4,7 @@
 |---|---|
 | **Component** | C-02 Presentation & Camera |
 | **Ownership** | SE-2 |
-| **Status** | Design (documentation only) |
+| **Status** | **Partial P2–P3** — dev GameScene (grid + rect haulers + treasure atlas); full sprites/camera/VFX open |
 | **Engine** | Phaser 3 (client only) |
 | **Related** | [COMPONENTS.md](../../COMPONENTS.md) §C-02, [ARCHITECTURE.md](../../ARCHITECTURE.md), [netcode-messages.md](../../interfaces/netcode-messages.md), [level-format.md](../../interfaces/level-format.md) |
 | **Frozen decisions** | Q5 — 960×540 logical, integer scale, letterbox ([ARCHITECT-OPEN-QUESTIONS.md](../../decisions/ARCHITECT-OPEN-QUESTIONS.md)) |

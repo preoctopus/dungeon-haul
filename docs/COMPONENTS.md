@@ -3,7 +3,31 @@
 Named components for parallel development. Each entry lists **responsibilities**, **non-responsibilities**, **dependencies**, and a suggested **engineer ownership cluster** (SE-1..SE-8).
 
 Interface contracts: [interfaces/OVERVIEW.md](interfaces/OVERVIEW.md).  
-Architecture context: [ARCHITECTURE.md](ARCHITECTURE.md).
+Architecture context: [ARCHITECTURE.md](ARCHITECTURE.md).  
+Phase progress: [IMPLEMENTATION-PLAN.md](IMPLEMENTATION-PLAN.md).
+
+---
+
+## Code status (implementation progress)
+
+Approximate; design docs under `components/<name>/` remain binding for behavior. Update this table when a component’s shippable slice changes.
+
+| ID | Component | Code status | Primary path |
+|---|---|---|---|
+| C-01 | Client shell | **Partial** — Boot + dev lobby overlay; no full scene graph | `client/src/` |
+| C-02 | Presentation | **Partial** — solid grid, rect haulers, treasure sprites from atlas | `client/src/scenes/GameScene.ts` |
+| C-03 | Input mapper | **Partial** — keyboard level scheme for dev | `client/src/net/inputMapper.ts` |
+| C-04 | Netcode client | **Done (P2)** — join, prediction, interp, reconnect | `client/src/net/` |
+| C-05 | Lobby session | **Done (P2)** — create/join codes, seat tokens REST | `server/src/lobby/` |
+| C-06 | Simulation | **Done (P2–P3)** — movement + treasure/traps/AI hooks | `server/src/sim/` |
+| C-07 | Rules engine | **Done (P1)** — catalog, modifiers, payout, encumbrance | `packages/rules/` |
+| C-08 | AI controller | **Done (P3)** — pure decide cascade | `packages/ai/` |
+| C-09 | Level loader | **Done (P1)** — parser, fixtures, validator | `packages/levels/` |
+| C-10 | Fork vote | Not started | — |
+| C-11 | End screen | Not started | — |
+| C-12 | High scores | Not started (P5) | — |
+| C-13 | Audio director | Not started (assets may exist) | — |
+| C-14 | Telemetry | **Partial** — health endpoint + tick lag log | `server/src/` |
 
 ---
 

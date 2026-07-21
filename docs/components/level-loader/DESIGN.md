@@ -2,7 +2,8 @@
 
 > **Component:** C-09 Level Content Loader  
 > **Ownership:** SE-7  
-> **Phase:** Documentation only (no application code in this package of work)  
+> **Phase:** **Implemented P1** — `packages/levels` + `content/` fixtures (`box_level`, `hoard_01`).  
+
 > **Contracts:** [level-format.md](../../interfaces/level-format.md)  
 > **Catalog:** [COMPONENTS.md](../../COMPONENTS.md) §C-09  
 > **Architecture:** [ARCHITECTURE.md](../../ARCHITECTURE.md)  

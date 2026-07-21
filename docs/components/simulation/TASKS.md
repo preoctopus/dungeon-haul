@@ -6,7 +6,7 @@
 | Ownership | SE-5 |
 | Design | [DESIGN.md](DESIGN.md) |
 | Task ID scheme | `C06-T##` |
-| Constraint | Documentation already done; implementation tasks below are for **future code phases** — do not implement in docs-only work |
+| Constraint | Design frozen; code lives in `server/src/sim/`. P2–P3 tasks largely **done** — see task index Status column. |
 
 Dependencies on other components are noted; mock/stub allowed until those land.
 
@@ -248,40 +248,40 @@ Parallel: T07/T08 with T05 after T04; T16 with T17 after T10.
 
 ## Task index
 
-| ID | Title | Phase |
-|---|---|---|
-| C06-T01 | Session config & sim shell | P2 |
-| C06-T02 | Phase machine skeleton | P2 |
-| C06-T03 | Four hauler seats | P2 |
-| C06-T04 | Input queue & applyInput | P2 |
-| C06-T05 | AABB platforms, run, jump | P2 |
-| C06-T06 | Snapshot & event emission | P2 |
-| C06-T07 | Idle AI takeover hooks | P2 |
-| C06-T08 | AI input injection path | P2 |
-| C06-T09 | No global pause verification | P2 |
-| C06-T10 | Level load | P3 |
-| C06-T11 | Treasure spawn | P3 |
-| C06-T12 | Pickup / drop / throw | P3 |
-| C06-T13 | Encumbrance | P3 |
-| C06-T14 | Stun, spill, lockout | P3 |
-| C06-T15 | Trip / push | P3 |
-| C06-T16 | Ice / sand surfaces | P3 |
-| C06-T17 | Trap MVP | P3 |
-| C06-T18 | Switches | P3 |
-| C06-T19 | Level exit & stats | P3 |
-| C06-T20 | PlayerStats wiring | P3 |
-| C06-T21 | Mid-join spawn | P3 |
-| C06-T22 | Instructions phase | P4 |
-| C06-T23 | Hoard → Fork | P4 |
-| C06-T24 | Fork / End branch | P4 |
-| C06-T25 | Load fork winner level | P4 |
-| C06-T26 | End scoring | P4 |
-| C06-T27 | End input routing | P4 |
-| C06-T28 | Reconnect continuity | P5 |
-| C06-T29 | Tick budget metrics | P5 |
-| C06-T30 | Golden input tapes | P5 |
-| C06-T31 | Pit destroy treasure | P5 |
-| C06-T32 | Trap stubs expansion | P5 |
-| C06-T33 | Shared kinematics | Stretch |
-| C06-T34 | Delta snapshots | Stretch |
-| C06-T35 | 60 Hz option | Stretch |
+| ID | Title | Phase | Status |
+|---|---|---|---|
+| C06-T01 | Session config & sim shell | P2 | done |
+| C06-T02 | Phase machine skeleton | P2 | partial (level-only; full machine P4) |
+| C06-T03 | Four hauler seats | P2 | done |
+| C06-T04 | Input queue & applyInput | P2 | done |
+| C06-T05 | AABB platforms, run, jump | P2 | done |
+| C06-T06 | Snapshot & event emission | P2 | done |
+| C06-T07 | Idle AI takeover hooks | P2 | done (20s path) |
+| C06-T08 | AI input injection path | P2/P3 | done (`packages/ai`) |
+| C06-T09 | No global pause verification | P2 | done |
+| C06-T10 | Level load | P3 | done (ctor load) |
+| C06-T11 | Treasure spawn | P3 | done |
+| C06-T12 | Pickup / drop / throw | P3 | done |
+| C06-T13 | Encumbrance | P3 | done |
+| C06-T14 | Stun, spill, lockout | P3 | done |
+| C06-T15 | Trip / push | P3 | done |
+| C06-T16 | Ice / sand surfaces | P3 | done |
+| C06-T17 | Trap MVP | P3 | done |
+| C06-T18 | Switches | P3 | done |
+| C06-T19 | Level exit & stats | P3 | done |
+| C06-T20 | PlayerStats wiring | P3 | done (session counters; end score P4) |
+| C06-T21 | Mid-join spawn | P3 | partial (soft-takeover preserve) |
+| C06-T22 | Instructions phase | P4 | pending |
+| C06-T23 | Hoard → Fork | P4 | pending |
+| C06-T24 | Fork / End branch | P4 | pending |
+| C06-T25 | Load fork winner level | P4 | pending |
+| C06-T26 | End scoring | P4 | pending |
+| C06-T27 | End input routing | P4 | pending |
+| C06-T28 | Reconnect continuity | P5 | partial (P2 room grace) |
+| C06-T29 | Tick budget metrics | P5 | partial (lag log) |
+| C06-T30 | Golden input tapes | P5 | pending |
+| C06-T31 | Pit destroy treasure | P5 | pending |
+| C06-T32 | Trap stubs expansion | P5 | partial (log-once stubs) |
+| C06-T33 | Shared kinematics | Stretch | pending |
+| C06-T34 | Delta snapshots | Stretch | pending |
+| C06-T35 | 60 Hz option | Stretch | pending |

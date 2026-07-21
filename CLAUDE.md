@@ -18,22 +18,47 @@ A prior non-binding AI build plan (Phaser + FastAPI) is in:
 
 ## Current phase
 
-**Planning complete; application code may not exist yet.** The repo is primarily a design package:
+**P0–P3 complete. Next up: P4 (full game flow shell).**  
+Design docs under `docs/` remain the source of truth; application code lives in the monorepo packages below.
+
+| Phase | Status | Notes / reports |
+|---|---|---|
+| **P0** Foundations | Done | pnpm monorepo, Vitest, protocol stubs |
+| **P1** Rules & levels | Done | `packages/rules`, `packages/levels` + fixtures |
+| **P2** Netcode slice | Done | [`docs/testing/reports/P2-DEMO.md`](docs/testing/reports/P2-DEMO.md) |
+| **P3** Core gameplay + AI | Done | [`docs/testing/reports/P3-GAMEPLAY.md`](docs/testing/reports/P3-GAMEPLAY.md) |
+| **P4** Flow shell | Not started | Title→Lobby→Instructions→Hoard→Fork→End |
+| **P5+** Persistence / content / stretch | Not started | High scores, deploy, biomes breadth |
 
 | Area | Location |
 |---|---|
 | Architecture, stack, NFRs | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) |
 | Component catalog | [`docs/COMPONENTS.md`](docs/COMPONENTS.md) |
-| Delivery phases | [`docs/IMPLEMENTATION-PLAN.md`](docs/IMPLEMENTATION-PLAN.md) |
+| Delivery phases + status | [`docs/IMPLEMENTATION-PLAN.md`](docs/IMPLEMENTATION-PLAN.md) |
 | Interface contracts | [`docs/interfaces/`](docs/interfaces/) |
 | Per-component design / tasks / tests | [`docs/components/<name>/`](docs/components/) |
-| Test strategy | [`docs/testing/`](docs/testing/) |
-| Art asset specs (no binaries yet) | [`docs/art/`](docs/art/) |
+| Test strategy + session reports | [`docs/testing/`](docs/testing/), [`docs/testing/reports/`](docs/testing/reports/) |
+| Art specs + production status | [`docs/art/`](docs/art/), [`docs/art/ASSET-STATUS.md`](docs/art/ASSET-STATUS.md) |
 | Product freezes & ADRs | [`docs/decisions/`](docs/decisions/) |
 
 Start with [`docs/README.md`](docs/README.md) for reading order.
 
 When implementing code, **follow frozen docs**. Prefer ADRs for stack or multiplayer changes; do not silently re-litigate product freezes.
+
+### What’s implemented (code map)
+
+| Layer | Location | Covers |
+|---|---|---|
+| Protocol v1 | `packages/protocol` | Messages, codecs, lobby DTOs |
+| Rules (C-07) | `packages/rules` | Treasure catalog, shares, encumbrance, payout |
+| Levels (C-09) | `packages/levels` | Pixel-map parse, palette, box/hoard fixtures |
+| AI (C-08) | `packages/ai` | Pure `decide()` flock / loot / switch / stuck |
+| Server sim + room (C-05/C-06) | `server/` | Lobby REST, Colyseus `HaulSession`, 30 Hz sim |
+| Client net + dev UI (C-03/C-04 slice) | `client/` | Join, prediction, interpolation, reconnect, loot draw |
+| Content | `content/` | `box_level`, `hoard_01`, biomes/palette JSON |
+| Production art | `client/public/assets/` | Atlases + screens (see ASSET-STATUS) |
+
+**Not yet (P4+):** full scene graph (Title/Lobby/Fork/End), end scoring UI, high-score DB, fork-vote component, full C-02 character presentation, audio director wiring.
 
 ## Product freezes (do not re-open without ADR + owner OK)
 
@@ -67,11 +92,11 @@ See [`docs/decisions/ADR-001-tech-stack.md`](docs/decisions/ADR-001-tech-stack.m
 |---|---|
 | Client | Phaser 3 + TypeScript + Vite |
 | Server | Node.js/TypeScript + **Colyseus** rooms (authoritative sim, 30 Hz) |
-| Shared | `packages/rules` (pure), `packages/protocol` (messages) |
-| Lobby / REST | Hono (or Fastify) |
-| Persistence | PostgreSQL (high scores) |
-| Monorepo | pnpm workspaces (or npm workspaces) |
-| Deploy | Docker; Fly.io-class sticky WebSocket rooms |
+| Shared | `packages/rules` (pure), `packages/protocol` (messages), `packages/levels`, `packages/ai` (pure) |
+| Lobby / REST | Hono |
+| Persistence | PostgreSQL (high scores) — **not wired yet** (P5) |
+| Monorepo | pnpm workspaces |
+| Deploy | Docker; Fly.io-class sticky WebSocket rooms — **not deployed yet** (P5) |
 
 **Rejected for game loop:** peer-to-peer host, pure serverless rooms without sticky WS, FastAPI as sim authority (dual-language rules drift).
 
@@ -157,6 +182,13 @@ Follow [`docs/testing/AUTOMATED-TEST-STRATEGY.md`](docs/testing/AUTOMATED-TEST-S
   - `generate_char_extras.py` — Generates & packs Title stick walk-ins, Argue/Rummage poses into `atlas_char_extras`.
   - `generate_and_process_level_props.py` — Generates & packs background props (torches, banners, candelabras, grates) into `atlas_level_props`.
   - `process_screens.py` — Resizes and converts screen background artwork to 960×540 WebP images.
+  - `generate_previews_pack.py` — Programmatically creates 10 high-resolution preview graphics and showcases in `docs/art/preview/`.
+  - `generate_audio_suite.py` — Master script executing all 8-bit NES sound effects and music stem generators.
+  - `generate_sfx_jump.py` — Synthesizes 8-bit NES jump pitch-sweep sound (`char_jump.wav`).
+  - `generate_sfx_pickup.py` — Synthesizes 8-bit NES treasure pickup chime (`pickup_treasure.wav`).
+  - `generate_spikes_sfx.py` — Synthesizes 8-bit NES metallic spike trap snap (`trap_spikes.wav`).
+  - `generate_sfx_ui_start.py` — Synthesizes 8-bit NES arcade start press sound (`ui_start_game.wav`).
+  - `generate_music_title.py` — Synthesizes loopable 8-bit NES title music stem (`music_title.wav`).
 
 ### Documentation hygiene
 
@@ -165,22 +197,36 @@ Follow [`docs/testing/AUTOMATED-TEST-STRATEGY.md`](docs/testing/AUTOMATED-TEST-S
 - Do not rewrite the source PDFs
 - Do not put secrets in docs or code; use env/secrets for DB URLs
 
-## Suggested monorepo layout (when code lands)
+## Monorepo layout
 
 ```text
 /
 ├── CLAUDE.md
-├── docs/                 # design package (exists)
+├── docs/                 # design + test reports (source of truth for behavior)
 ├── packages/
-│   ├── rules/            # pure TS — share modifiers, treasure value
-│   └── protocol/         # message types, shared enums
-├── client/               # Phaser + Vite
-├── server/               # Colyseus room + lobby REST + sim
-├── content/levels/       # pixel maps + meta
-└── ...
+│   ├── protocol/         # wire types, codecs (v1 freeze)
+│   ├── rules/            # pure share modifiers + treasure value
+│   ├── levels/           # pixel-map loader / fixtures
+│   └── ai/               # pure C-08 decide() + helpers
+├── client/               # Phaser + Vite (dev lobby + GameScene)
+├── server/               # Hono lobby REST + Colyseus HaulSession + sim
+├── content/              # levels, palette, biomes, pool JSON
+├── art_raw/              # high-res masters (not served)
+└── scripts/              # asset pipeline + audio generators
 ```
 
-If the tree differs, update this section and ARCHITECTURE.md together.
+### Local run (P2/P3 playtest)
+
+```bash
+pnpm install
+pnpm -r build
+# Terminal 1
+pnpm --filter @dhaul/server dev
+# Terminal 2
+pnpm --filter @dhaul/client dev
+```
+
+Controls: arrows/WASD move, Z/Space jump, X action; duck pickup; action+down drop; action+up throw.
 
 ## Game flow (quick)
 

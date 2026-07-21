@@ -1,6 +1,6 @@
 # Dungeon Haul — System Architecture
 
-> **Phase:** Documentation only (no application code).  
+> **Phase:** Architecture is binding; **code implements P0–P3** (see [IMPLEMENTATION-PLAN.md](IMPLEMENTATION-PLAN.md)).  
 > **Sources:** `docs/source/TOJam 8_ Dungeon Haul Design Document.pdf` (canonical),  
 > `docs/source/AI Agent Game Build Plan.pdf` (prior orchestration candidate; non-binding).  
 > **Product constraint:** **Online multiplayer is first-class** (not local-only couch co-op).

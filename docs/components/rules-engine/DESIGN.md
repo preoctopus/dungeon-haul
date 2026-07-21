@@ -3,7 +3,8 @@
 > **Component:** C-07 Rules Engine  
 > **Package:** `packages/rules`  
 > **Ownership:** SE-6  
-> **Status:** Design only (no application code)  
+> **Status:** **Implemented P1** — `packages/rules` (catalog, modifiers, payout, encumbrance).  
+
 > **Contract:** [share-modifier-api.md](../../interfaces/share-modifier-api.md)  
 > **Sources:** design doc §0.0, §1.5, §2.2, §2.3; [ARCHITECTURE.md](../../ARCHITECTURE.md) §4/§8; [COMPONENTS.md](../../COMPONENTS.md) C-07
 

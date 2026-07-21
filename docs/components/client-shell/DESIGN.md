@@ -3,6 +3,7 @@
 | Field | Value |
 |---|---|
 | Component ID | **C-01** |
+| Status | **Partial P2** — Boot + DOM dev lobby; full Title/Lobby/Fork/End scene graph is **P4** |
 | Slug | `client-shell` |
 | Ownership | **SE-1** |
 | Stack | Phaser 3 + TypeScript + Vite (client only) |
