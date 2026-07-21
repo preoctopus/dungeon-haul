@@ -56,6 +56,31 @@
       "key": "atlas_tiles_cavern",
       "texture": "assets/atlases/atlas_tiles_cavern.webp",
       "atlas": "assets/atlases/atlas_tiles_cavern.json"
+    },
+    {
+      "key": "atlas_treasures_sets",
+      "texture": "assets/atlases/atlas_treasures_sets.webp",
+      "atlas": "assets/atlases/atlas_treasures_sets.json"
+    },
+    {
+      "key": "atlas_ui_icons",
+      "texture": "assets/atlases/atlas_ui_icons.webp",
+      "atlas": "assets/atlases/atlas_ui_icons.json"
+    },
+    {
+      "key": "atlas_vfx",
+      "texture": "assets/atlases/atlas_vfx.webp",
+      "atlas": "assets/atlases/atlas_vfx.json"
+    },
+    {
+      "key": "atlas_char_extras",
+      "texture": "assets/atlases/atlas_char_extras.webp",
+      "atlas": "assets/atlases/atlas_char_extras.json"
+    },
+    {
+      "key": "atlas_level_props",
+      "texture": "assets/atlases/atlas_level_props.webp",
+      "atlas": "assets/atlases/atlas_level_props.json"
     }
   ],
   "images": [
