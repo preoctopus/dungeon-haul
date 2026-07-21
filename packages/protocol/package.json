@@ -1,8 +1,8 @@
 {
   "name": "@dhaul/protocol",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
-  "description": "Dungeon Haul protocol v0 — wire message and payload types (docs/interfaces/netcode-messages.md)",
+  "description": "Dungeon Haul protocol v1 (P2 freeze, gate G1) — wire message/payload types, runtime codecs and validators, lobby REST DTOs (docs/interfaces/netcode-messages.md, lobby-and-scores.md). v0→v1: added session DTOs, InputCommand/C2S_Input/join-options validators, JSON codec helpers, and Colyseus join-error code mapping; wire protocolVersion stays 1.",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

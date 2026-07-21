@@ -4,3 +4,5 @@ packages:
   - packages/*
 allowBuilds:
   esbuild: true
+  # msgpackr ships a pure-JS fallback; skip the native extract build.
+  msgpackr-extract: false
