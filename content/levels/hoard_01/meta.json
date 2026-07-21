@@ -1,0 +1,13 @@
+{
+  "id": "hoard_01",
+  "displayName": "The Treasure Hoard",
+  "biome": "gold",
+  "blockSizePx": 32,
+  "pathTags": ["hoard", "start"],
+  "musicId": "hoard",
+  "forkTheme": null,
+  "treasureSlotDefaultRarity": "world",
+  "poolEligible": false,
+  "switchLinks": [],
+  "version": 1
+}

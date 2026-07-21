@@ -1,0 +1,9 @@
+{
+  "id": "box_level",
+  "displayName": "Box Level",
+  "biome": "dungeon",
+  "blockSizePx": 32,
+  "pathTags": ["net-test"],
+  "poolEligible": false,
+  "version": 1
+}

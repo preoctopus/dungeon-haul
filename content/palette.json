@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "colors": {
+    "#FFFFFF": "empty",
+    "#C0C0C0": "spacer",
+    "#000000": "brick",
+    "#66CCFF": "ice",
+    "#D2B48C": "sand",
+    "#FF0000": "switch",
+    "#990000": "heavy_switch",
+    "#555555": "spikes",
+    "#8B4513": "crumbling",
+    "#4682B4": "receding",
+    "#FFFF00": "lightning_cycle",
+    "#CCCC00": "lightning_switch",
+    "#7FFF00": "gas_switch",
+    "#708090": "falling_rock_spawner",
+    "#800000": "golem_spawn",
+    "#9370DB": "phantom_spawn",
+    "#FFD700": "treasure_slot",
+    "#FF00FF": "player_spawn_0",
+    "#EE00EE": "player_spawn_1",
+    "#DD00DD": "player_spawn_2",
+    "#CC00CC": "player_spawn_3",
+    "#00FFFF": "exit",
+    "#334455": "near_bg_pillar",
+    "#445566": "near_bg_torch",
+    "#223344": "fore_grass",
+    "#112233": "fore_vine"
+  }
+}

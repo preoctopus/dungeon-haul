@@ -1,0 +1,44 @@
+{
+  "gold": {
+    "headerRgb": "#FFC300",
+    "tilesetKey": "tiles_gold",
+    "farBgKey": "bg_far_gold",
+    "defaultMusicId": "music_hoard"
+  },
+  "outside": {
+    "headerRgb": "#2E8B22",
+    "tilesetKey": "tiles_outside",
+    "farBgKey": "bg_far_outside",
+    "defaultMusicId": "music_outside"
+  },
+  "dungeon": {
+    "headerRgb": "#808080",
+    "tilesetKey": "tiles_dungeon",
+    "farBgKey": "bg_far_dungeon",
+    "defaultMusicId": "music_dungeon"
+  },
+  "lava": {
+    "headerRgb": "#E02010",
+    "tilesetKey": "tiles_lava",
+    "farBgKey": "bg_far_lava",
+    "defaultMusicId": "music_lava"
+  },
+  "ice": {
+    "headerRgb": "#2060E0",
+    "tilesetKey": "tiles_ice",
+    "farBgKey": "bg_far_ice",
+    "defaultMusicId": "music_ice"
+  },
+  "cavern": {
+    "headerRgb": "#8B5A2B",
+    "tilesetKey": "tiles_cavern",
+    "farBgKey": "bg_far_cavern",
+    "defaultMusicId": "music_cavern"
+  },
+  "mist": {
+    "headerRgb": "#803080",
+    "tilesetKey": "tiles_mist",
+    "farBgKey": "bg_far_mist",
+    "defaultMusicId": "music_mist"
+  }
+}

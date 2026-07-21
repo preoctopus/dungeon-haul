@@ -1,0 +1,33 @@
+{
+  "name": "@dhaul/levels",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Dungeon Haul level content loader (C-09) — pixel-map parser, palette, fixtures, validator. Node/tooling only; no Phaser.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint src test",
+    "test": "vitest run",
+    "validate": "pnpm run build && node dist/tools/validateCli.js",
+    "gen:fixtures": "pnpm run build && node dist/tools/generateFixtures.js"
+  },
+  "dependencies": {
+    "pngjs": "^7.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@types/pngjs": "^6.0.5"
+  }
+}
