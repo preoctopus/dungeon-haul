@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instructions & Online Game Guide — Dungeon Haul</title>
+  <meta name="description" content="Master Dungeon Haul online multiplayer! Learn NES control layouts, room code lobby creation, authoritative netcode rules, encumbrance, and share modifier calculations.">
+  
+  <!-- CSS Stylesheet -->
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar" aria-label="Main Navigation">
+    <div class="navbar-container">
+      <a href="index.html" class="brand-logo">
+        <div class="brand-icon">DH</div>
+        <span class="brand-title">DUNGEON HAUL</span>
+      </a>
+
+      <ul class="nav-links">
+        <li><a href="index.html" class="nav-link">Home</a></li>
+        <li><a href="characters.html" class="nav-link">The Haulers</a></li>
+        <li><a href="instructions.html" class="nav-link active">Instructions</a></li>
+        <li><a href="credits.html" class="nav-link">Credits</a></li>
+        <li>
+          <a href="play.html" class="btn-play-nav">
+            <span>🎮</span> PLAY DEMO
+          </a>
+        </li>
+      </ul>
+
+      <button class="nav-toggle" aria-label="Toggle navigation menu">☰</button>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="container">
+      
+      <div class="section-header">
+        <span class="section-tag">Player Manual & Netcode Guide</span>
+        <h1 class="section-title gold-gradient-text">How to Play Dungeon Haul</h1>
+        <p class="section-desc">
+          Everything you need to know to join online rooms, dodge traps, hoard treasure, sabotage rival haulers, and maximize your payout at the end screen!
+        </p>
+      </div>
+
+      <div class="rules-container">
+        <!-- Sidebar Menu -->
+        <aside class="rules-sidebar">
+          <ul class="rules-menu">
+            <li><a href="#online-session" class="rules-menu-link active">1. Online Rooms & Netcode</a></li>
+            <li><a href="#controls" class="rules-menu-link">2. NES Controls Layout</a></li>
+            <li><a href="#loop" class="rules-menu-link">3. Gameplay Loop</a></li>
+            <li><a href="#encumbrance" class="rules-menu-link">4. Encumbrance & Carry</a></li>
+            <li><a href="#share-formula" class="rules-menu-link">5. Share Formula</a></li>
+            <li><a href="#modifiers" class="rules-menu-link">6. Share Modifiers Table</a></li>
+            <li><a href="#biomes" class="rules-menu-link">7. Biomes & Hazards</a></li>
+          </ul>
+        </aside>
+
+        <!-- Main Content Column -->
+        <div>
+
+          <!-- 1. Online Multiplayer & Netcode Section -->
+          <section id="online-session" class="rules-content-block">
+            <h2><span>🌐</span> 1. First-Class Online Multiplayer</h2>
+            <p style="margin-bottom: 1rem;">
+              Dungeon Haul is designed ground-up for <strong>first-class online multiplayer</strong> powered by an authoritative Colyseus WebSocket server.
+            </p>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem; margin: 1.5rem 0;">
+              <div style="background: rgba(243, 192, 50, 0.08); border: 1px solid var(--border-gold); padding: 1.25rem; border-radius: var(--radius-sm);">
+                <strong style="color: var(--gold-light); display: block; margin-bottom: 0.5rem;">🔑 Private Room Codes</strong>
+                <p style="font-size: 0.85rem; color: var(--text-muted);">Create or join private 6-character room codes (e.g. <code>DH-8842</code>). No mandatory account registration required!</p>
+              </div>
+
+              <div style="background: rgba(80, 160, 232, 0.08); border: 1px solid var(--hauler-sprite); padding: 1.25rem; border-radius: var(--radius-sm);">
+                <strong style="color: var(--hauler-sprite); display: block; margin-bottom: 0.5rem;">⚙️ Authoritative Server</strong>
+                <p style="font-size: 0.85rem; color: var(--text-muted);">The server simulates physics at 30 Hz. Client predicts movement while the server validates inventory, traps, and scores.</p>
+              </div>
+
+              <div style="background: rgba(240, 160, 64, 0.08); border: 1px solid var(--hauler-gnome); padding: 1.25rem; border-radius: var(--radius-sm);">
+                <strong style="color: var(--hauler-gnome); display: block; margin-bottom: 0.5rem;">🤖 AI Seat Fill</strong>
+                <p style="font-size: 0.85rem; color: var(--text-muted);">Every game maintains exactly 4 hauler seats. Unfilled seats or disconnected players are smoothly taken over by AI controllers.</p>
+              </div>
+
+              <div style="background: rgba(224, 112, 176, 0.08); border: 1px solid var(--hauler-halfling); padding: 1.25rem; border-radius: var(--radius-sm);">
+                <strong style="color: var(--hauler-halfling); display: block; margin-bottom: 0.5rem;">🔄 Drop-In & Reconnect</strong>
+                <p style="font-size: 0.85rem; color: var(--text-muted);">Lost your Wi-Fi? Reconnect to your active session using your session token to reclaim your seat seamlessly!</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- 2. Controls Section -->
+          <section id="controls" class="rules-content-block">
+            <h2><span>🕹️</span> 2. NES Control Layout</h2>
+            <p>
+              Dungeon Haul uses a clean, responsive NES-style control scheme designed for maximum clarity during high-speed slapstick moments:
+            </p>
+
+            <div class="controls-diagram-card">
+              <span class="pixel-text" style="color: var(--gold-primary); font-size: 0.8rem;">NES GAMEPAD / KEYBOARD MAPPING</span>
+              <div class="controls-grid">
+                <div class="control-key-box">
+                  <span class="key-badge">DPAD / WASD</span>
+                  <p style="font-size: 0.9rem;">Run Left / Right<br>Duck / Pick Up Loot</p>
+                </div>
+
+                <div class="control-key-box">
+                  <span class="key-badge">BUTTON A / SPACE</span>
+                  <p style="font-size: 0.9rem;">Jump / Rise<br>Hover (Sprite)</p>
+                </div>
+
+                <div class="control-key-box">
+                  <span class="key-badge">BUTTON B / K</span>
+                  <p style="font-size: 0.9rem;">Shoulder Push / Trip<br>Drop / Throw Stack</p>
+                </div>
+
+                <div class="control-key-box">
+                  <span class="key-badge">DOWN + B</span>
+                  <p style="font-size: 0.9rem;">Fast Drop Treasure<br>Clear Top Stack Item</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 3. Gameplay Loop Section -->
+          <section id="loop" class="rules-content-block">
+            <h2><span>🔄</span> 3. The Online Gameplay Loop</h2>
+            <ol style="margin-left: 1.5rem; display: flex; flex-direction: column; gap: 1rem; color: var(--text-muted);">
+              <li>
+                <strong style="color: var(--text-main);">Online Lobby & Room Code:</strong> Create or enter a private room code. Claim your class (Gnome, Sprite, Halfling, Dwarf) and toggle ready.
+              </li>
+              <li>
+                <strong style="color: var(--text-main);">Level 0 Treasure Hoard:</strong> The run begins in a treasure-packed vault room! Grab as many burlap sacks, crowns, and chests as you can carry.
+              </li>
+              <li>
+                <strong style="color: var(--text-main);">Fork Voting Chamber:</strong> At the end of each level, vote on the next biome path (e.g. Lava vs. Ice). Button-mash to argue your choice and sway the group!
+              </li>
+              <li>
+                <strong style="color: var(--text-main);">Dungeon Escape:</strong> Navigate dangerous biomes, hit switches, dodge spike traps, and trip opponents to steal their top stack items.
+              </li>
+              <li>
+                <strong style="color: var(--text-main);">End Payout & Share Titles:</strong> Upon escaping, arcane Share Modifiers are evaluated on the server. Earn titles, calculate final GP shares, and top the high-score leaderboard!
+              </li>
+            </ol>
+          </section>
+
+          <!-- 4. Encumbrance Section -->
+          <section id="encumbrance" class="rules-content-block">
+            <h2><span>⚖️</span> 4. Encumbrance & Carry Stack</h2>
+            <p style="margin-bottom: 1rem;">
+              Haulers carry treasures in a vertical stack above their head.
+            </p>
+            <ul style="margin-left: 1.5rem; display: flex; flex-direction: column; gap: 0.75rem; color: var(--text-muted);">
+              <li>First <strong>3 treasures</strong> can be carried with zero movement penalty.</li>
+              <li>Additional items beyond 3 cause a cumulative decrease in run speed and jump height.</li>
+              <li>Greed Overwhelming occurs if speed drops to zero — making you an easy target for shoulder pushes!</li>
+              <li>If injured or stunned, your carry stack spills Sonic-style across the room!</li>
+            </ul>
+          </section>
+
+          <!-- 5. Share Formula Section -->
+          <section id="share-formula" class="rules-content-block">
+            <h2><span>🧮</span> 5. Share Formula & Payout</h2>
+            <p style="margin-bottom: 1rem;">
+              Your final Gold Piece (GP) take is determined by the server payout formula:
+            </p>
+            <div style="background: #000; border: 1px solid var(--border-gold); padding: 1.5rem; border-radius: var(--radius-sm); text-align: center; margin: 1rem 0;">
+              <span class="pixel-text" style="color: var(--gold-light); font-size: 0.85rem;">
+                Player Take = Total Dungeon GP × ( Player Shares / Sum of All Shares )
+              </span>
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.95rem;">
+              * Note: Every hauler receives a guaranteed <strong>minimum of 1 share</strong>, even if penalties would otherwise reduce their total below zero!
+            </p>
+          </section>
+
+          <!-- 6. Modifiers Catalog Section -->
+          <section id="modifiers" class="rules-content-block">
+            <h2><span>🎖️</span> 6. Share Modifiers Catalog</h2>
+            <p style="margin-bottom: 1rem;">
+              Search or filter arcane modifiers awarded at the end of every run:
+            </p>
+
+            <input type="text" id="modifier-search" placeholder="Type to filter modifiers (e.g. Klutz, Leader, Airhead)..." 
+                   style="width: 100%; padding: 0.75rem 1rem; background: #000; border: 1px solid var(--border-gold); color: var(--text-main); font-family: var(--font-body); border-radius: var(--radius-sm); margin-bottom: 1.5rem;">
+
+            <div style="overflow-x: auto;">
+              <table class="modifier-table">
+                <thead>
+                  <tr>
+                    <th>Title</th>
+                    <th>Type</th>
+                    <th>Shares Delta</th>
+                    <th>Award Condition</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><strong>Leader of the Pack</strong></td>
+                    <td><span class="tag-reward">REWARD (GOLD)</span></td>
+                    <td style="color: var(--color-success); font-weight: bold;">+10 Shares</td>
+                    <td>Always the first hauler to exit each level stage.</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Breadwinner</strong></td>
+                    <td><span class="tag-reward">REWARD (GOLD)</span></td>
+                    <td style="color: var(--color-success); font-weight: bold;">+5 Shares</td>
+                    <td>Recovered the highest total treasure value in GP.</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Airhead</strong></td>
+                    <td><span class="tag-reward">REWARD</span></td>
+                    <td style="color: var(--color-success); font-weight: bold;">+3 Shares</td>
+                    <td>Spent the most cumulative airtime jumping and flying.</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Jammy</strong></td>
+                    <td><span class="tag-reward">REWARD</span></td>
+                    <td style="color: var(--color-success); font-weight: bold;">+1 Share</td>
+                    <td>Brought the sacred Goat on a Pole artifact to the exit.</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Collector</strong></td>
+                    <td><span class="tag-reward">REWARD</span></td>
+                    <td style="color: var(--color-success); font-weight: bold;">+1 / Piece</td>
+                    <td>Bonus per set piece in a completed suit (e.g. Armor set).</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Flawless</strong></td>
+                    <td><span class="tag-reward">REWARD</span></td>
+                    <td style="color: var(--color-success); font-weight: bold;">+5 Shares</td>
+                    <td>Completed the entire run without taking any damage or stuns.</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Klutz</strong></td>
+                    <td><span class="tag-penalty">PENALTY</span></td>
+                    <td style="color: var(--color-danger); font-weight: bold;">-3 Shares</td>
+                    <td>Triggered or got hit by the most environmental traps.</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Butterfingers</strong></td>
+                    <td><span class="tag-penalty">PENALTY</span></td>
+                    <td style="color: var(--color-danger); font-weight: bold;">-3 Shares</td>
+                    <td>Lost and spilled the highest number of carried treasures.</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Big Jerk</strong></td>
+                    <td><span class="tag-penalty">PENALTY (RED)</span></td>
+                    <td style="color: var(--color-danger); font-weight: bold;">-5 Shares</td>
+                    <td>Delivered the most shoulder pushes and trips to teammates.</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Empty Handed</strong></td>
+                    <td><span class="tag-penalty">PENALTY</span></td>
+                    <td style="color: var(--color-danger); font-weight: bold;">-3 Shares</td>
+                    <td>Crossed the final exit door with zero carried treasure.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <!-- 7. Biomes Section -->
+          <section id="biomes" class="rules-content-block">
+            <h2><span>🌋</span> 7. Biomes & Hazards</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; margin-top: 1rem;">
+              <div style="background: rgba(0,0,0,0.4); border: 1px solid var(--border-gold); padding: 1.25rem; border-radius: var(--radius-sm);">
+                <h3 style="color: var(--gold-light); font-size: 1.1rem; margin-bottom: 0.5rem;">🏰 Dungeon</h3>
+                <p style="font-size: 0.85rem; color: var(--text-muted);">Grey brick stone walls, iron portcullis gates, retractable floor spikes, and wall torches.</p>
+              </div>
+
+              <div style="background: rgba(0,0,0,0.4); border: 1px solid var(--hauler-dwarf); padding: 1.25rem; border-radius: var(--radius-sm);">
+                <h3 style="color: var(--hauler-dwarf); font-size: 1.1rem; margin-bottom: 0.5rem;">🔥 Lava Biome</h3>
+                <p style="font-size: 0.85rem; color: var(--text-muted);">Basalt pillars, fiery lava pits, heat shimmers, and explosive fireball geysers.</p>
+              </div>
+
+              <div style="background: rgba(0,0,0,0.4); border: 1px solid var(--hauler-sprite); padding: 1.25rem; border-radius: var(--radius-sm);">
+                <h3 style="color: var(--hauler-sprite); font-size: 1.1rem; margin-bottom: 0.5rem;">🧊 Ice Biome</h3>
+                <p style="font-size: 0.85rem; color: var(--text-muted);">Slick slippery ice blocks, falling icicles, and frost sheen that reduces traction.</p>
+              </div>
+
+              <div style="background: rgba(0,0,0,0.4); border: 1px solid var(--hauler-gnome); padding: 1.25rem; border-radius: var(--radius-sm);">
+                <h3 style="color: var(--hauler-gnome); font-size: 1.1rem; margin-bottom: 0.5rem;">⛰️ Cavern Biome</h3>
+                <p style="font-size: 0.85rem; color: var(--text-muted);">Rough stone terrain, falling boulder shadows, crumbling ledges, and giant mushrooms.</p>
+              </div>
+            </div>
+          </section>
+
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-container">
+      <div class="footer-brand">
+        <a href="index.html" class="brand-logo">
+          <div class="brand-icon">DH</div>
+          <span class="brand-title">DUNGEON HAUL</span>
+        </a>
+        <p>An online multiplayer arcade sidescroller about gold, traps, and slapstick sabotage.</p>
+      </div>
+
+      <div>
+        <h4 class="footer-column-title">Explore</h4>
+        <ul class="footer-links">
+          <li><a href="index.html">Home Overview</a></li>
+          <li><a href="characters.html">Character Classes</a></li>
+          <li><a href="instructions.html">Rules & Controls</a></li>
+          <li><a href="play.html">Arcade Playground</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4 class="footer-column-title">Credits & Info</h4>
+        <ul class="footer-links">
+          <li><a href="credits.html">Development Team</a></li>
+          <li><a href="credits.html#tojam">TOJam 8 Background</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>&copy; 2026 Dungeon Haul Remake. Game Design: Greg Beaton • Dev: Andrew Tarzwell • Breakdown: Grok • Code: Claude Fable • Art: Antigravity.</p>
+      <p>Built with Phaser 3 & Colyseus Architecture.</p>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="js/main.js"></script>
+</body>
+</html>

@@ -67,3 +67,40 @@ Results and high scores screens designed for the 960×540 logical viewport:
 <!-- slide -->
 ![Controls Guide and High Scores Leaderboard UI](file:///Users/atarzwell/src/dhaul4/docs/art/preview/ui_instructions_highscores_1784606230270.jpg)
 ````
+
+---
+
+## 7. Newly Generated Expansion Biomes & Website Art Assets (10 New Showcases)
+
+The following 10 art asset showcases were generated to expand biome environments, enemy/trap grids, secondary loot sets, UI icons, VFX, level decor props, and promotional website assets:
+
+1. **Lava Biome Showcase:** `gameplay_lava_level_preview`
+   ![Lava Biome Showcase](file:///Users/atarzwell/src/dhaul4/docs/art/preview/gameplay_lava_level_preview.jpg)
+
+2. **Ice Biome Showcase:** `gameplay_ice_level_preview`
+   ![Ice Biome Showcase](file:///Users/atarzwell/src/dhaul4/docs/art/preview/gameplay_ice_level_preview.jpg)
+
+3. **Cavern & Mushroom Biome Showcase:** `gameplay_cavern_level_preview`
+   ![Cavern Biome Showcase](file:///Users/atarzwell/src/dhaul4/docs/art/preview/gameplay_cavern_level_preview.jpg)
+
+4. **Mist & Ruin Biome Showcase:** `gameplay_mist_level_preview`
+   ![Mist Biome Showcase](file:///Users/atarzwell/src/dhaul4/docs/art/preview/gameplay_mist_level_preview.jpg)
+
+5. **Expansion Enemies & Hazards Grid:** `atlas_enemies_traps_preview`
+   ![Enemies and Traps Showcase](file:///Users/atarzwell/src/dhaul4/docs/art/preview/atlas_enemies_traps_preview.jpg)
+
+6. **Secondary & Team Loot Sets Grid:** `atlas_treasures_sets_preview`
+   ![Secondary Loot Sets Showcase](file:///Users/atarzwell/src/dhaul4/docs/art/preview/atlas_treasures_sets_preview.jpg)
+
+7. **Level Decor & Props Sheet:** `atlas_level_props_preview`
+   ![Level Decor Props Showcase](file:///Users/atarzwell/src/dhaul4/docs/art/preview/atlas_level_props_preview.jpg)
+
+8. **Action Particles & VFX Sheet:** `atlas_vfx_preview`
+   ![Visual Effects Showcase](file:///Users/atarzwell/src/dhaul4/docs/art/preview/atlas_vfx_preview.jpg)
+
+9. **Controls & UI Icons Grid:** `atlas_ui_icons_preview`
+   ![UI Icons Showcase](file:///Users/atarzwell/src/dhaul4/docs/art/preview/atlas_ui_icons_preview.jpg)
+
+10. **Promotional Website Hero Banner:** `website_hero_banner_art`
+    ![Promotional Website Hero Banner](file:///Users/atarzwell/src/dhaul4/docs/art/preview/website_hero_banner_art.jpg)
+

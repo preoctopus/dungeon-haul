@@ -1,0 +1,19 @@
+{
+  "name": "dungeon-haul-website",
+  "version": "1.0.0",
+  "description": "Dungeon Haul Official Promotional Website & Arcade Host",
+  "main": "index.html",
+  "scripts": {
+    "dev": "npx -y serve .",
+    "start": "npx -y serve ."
+  },
+  "keywords": [
+    "dungeon-haul",
+    "phaser3",
+    "colyseus",
+    "game",
+    "promo-website"
+  ],
+  "author": "Andrew Tarzwell",
+  "license": "MIT"
+}

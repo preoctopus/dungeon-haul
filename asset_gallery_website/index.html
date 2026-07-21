@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dungeon Haul — Asset Gallery & Production Vault</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Inter:wght@300;400;500;600;700&family=Press+Start+2P&display=swap" rel="stylesheet" />
+  <!-- Gallery Stylesheet -->
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- Hero Header Section -->
+  <header class="hero-header">
+    <div class="hero-bg-art"></div>
+    <div class="hero-content">
+      <div class="brand-badge">⚡ RETRO PIXEL ARCADE VAULT ⚡</div>
+      <h1 class="hero-title">DUNGEON HAUL</h1>
+      <h2 class="hero-subtitle">INTERACTIVE ASSET GALLERY &amp; PRODUCTION VAULT</h2>
+      
+      <!-- Stats Counter Grid -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div id="statTotal" class="stat-val">190</div>
+          <div class="stat-lbl">Total Assets</div>
+        </div>
+        <div class="stat-card">
+          <div id="statP0" class="stat-val">116</div>
+          <div class="stat-lbl">P0 MVP Items</div>
+        </div>
+        <div class="stat-card">
+          <div id="statP1" class="stat-val">69</div>
+          <div class="stat-lbl">P1 Expansion</div>
+        </div>
+        <div class="stat-card">
+          <div id="statP2" class="stat-val">5</div>
+          <div class="stat-lbl">P2 Stretch</div>
+        </div>
+        <div class="stat-card">
+          <div id="statShowcase" class="stat-val">22</div>
+          <div class="stat-lbl">Showcase Art</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Container -->
+  <main class="main-container">
+
+    <!-- Controls & Filter Panel -->
+    <section class="controls-panel">
+      <!-- Search Input -->
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input 
+          type="text" 
+          id="searchInput" 
+          class="search-input" 
+          placeholder="Search assets by name or Doc ID (e.g. char_gnome_idle, blk_lava_rock, tre_set_celestial_sun)..." 
+        />
+      </div>
+
+      <!-- Category Filter Group -->
+      <div class="filter-group">
+        <span class="filter-label">Filter Category:</span>
+        <div class="filter-buttons">
+          <button class="filter-btn active" data-category="all">🌐 All Assets</button>
+          <button class="filter-btn" data-category="characters">🧙 Characters</button>
+          <button class="filter-btn" data-category="biomes">🧱 Biome Tiles</button>
+          <button class="filter-btn" data-category="enemies">⚔️ Enemies &amp; Traps</button>
+          <button class="filter-btn" data-category="treasures">🪙 Treasures &amp; Loot</button>
+          <button class="filter-btn" data-category="uivfx">⚡ UI &amp; VFX</button>
+          <button class="filter-btn" data-category="showcase">🎨 Showcase Previews</button>
+          <button class="filter-btn" data-category="audio">🔊 Audio &amp; SFX</button>
+        </div>
+      </div>
+
+      <!-- Priority Tier Filter Group -->
+      <div class="filter-group">
+        <span class="filter-label">Filter Priority Tier:</span>
+        <div class="filter-buttons">
+          <button class="filter-btn active" data-priority="all">✨ All Tiers</button>
+          <button class="filter-btn" data-priority="p0">🟢 P0 MVP</button>
+          <button class="filter-btn" data-priority="p1">🔵 P1 Expansion</button>
+          <button class="filter-btn" data-priority="p2">🟣 P2 Stretch</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Status Bar & Result Counter -->
+    <div class="status-bar">
+      <div id="resultCounter" class="result-counter">Showing 190 of 190 assets</div>
+    </div>
+
+    <!-- Gallery Asset Cards Grid -->
+    <div id="galleryGrid" class="gallery-grid">
+      <!-- Dynamic asset cards rendered via app.js -->
+    </div>
+
+  </main>
+
+  <!-- Lightbox Modal Dialog -->
+  <div id="assetModal" class="modal" role="dialog" aria-modal="true">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 id="modalTitle" class="modal-title">Asset Details</h3>
+        <button id="modalCloseBtn" class="modal-close" aria-label="Close modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div id="modalPreviewContainer" class="modal-preview-box">
+          <!-- Canvas or Img rendered dynamically -->
+        </div>
+        <div class="modal-info-panel">
+          <table class="modal-meta-table">
+            <tr>
+              <td class="lbl">Doc ID:</td>
+              <td class="val"><code id="modalDocId">char_gnome_idle</code></td>
+            </tr>
+            <tr>
+              <td class="lbl">Priority:</td>
+              <td class="val"><span id="modalPriority" class="badge badge-priority badge-p0">P0 MVP</span></td>
+            </tr>
+            <tr>
+              <td class="lbl">Category:</td>
+              <td class="val"><span id="modalCategory" class="val">Characters</span></td>
+            </tr>
+            <tr>
+              <td class="lbl">Dimensions:</td>
+              <td id="modalDims" class="val">48×48px</td>
+            </tr>
+            <tr>
+              <td class="lbl">Public Path:</td>
+              <td id="modalPath" class="val" style="word-break: break-all; font-family: monospace; font-size: 0.8rem;">client/public/assets/atlases/char_gnome.webp</td>
+            </tr>
+          </table>
+
+          <div class="modal-actions">
+            <button id="btnCopyPath" class="btn-action btn-primary">📋 Copy Public Path</button>
+            <button id="btnCopyDocId" class="btn-action btn-secondary">🔑 Copy Doc ID</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast">Copied to clipboard!</div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-brand">DUNGEON HAUL — TOJAM 8 ARCADE EDITION</div>
+    <p>Asset Gallery &amp; Web App Showcase • 2026 Production Build</p>
+  </footer>
+
+  <!-- Application Logic -->
+  <script src="app.js"></script>
+</body>
+</html>
