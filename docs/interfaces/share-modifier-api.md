@@ -15,10 +15,15 @@ Canonical design: design doc §0.0, §2.2, §2.3 (and premise share list). Where
 // --- Treasure valuation ---
 getTreasureDef(defId: string): TreasureDef
 rollTreasureDef(rng: Rng, table: "world" | "wooden_chest" | "silver_chest" | "gold_chest" | "magic_chest", ctx: RollContext): TreasureDef
-computeInventoryValue(items: TreasureInstance[], setCatalog: SetDef[]): {
+computeInventoryValue(inventories: SeatInventory[], setCatalog?: SetDef[]): {
   totalGp: number
+  perSeatGp: { seatId, gp }[]
   setCompletions: { setId: string, bonusGp: number, contributors: seatId[] }[]
 }
+// SeatInventory = { seatId, items: TreasureInstance[] }
+// (Updated 2026-07-20 at implementation: instances carry no owner, so seat
+// attribution must come from the caller; a flat TreasureInstance[] is still
+// accepted and attributed to seat 0 for fixture convenience.)
 
 // --- Weight / movement modifiers ---
 computeEncumbrance(carryCount: number, carryWeight: number): {
