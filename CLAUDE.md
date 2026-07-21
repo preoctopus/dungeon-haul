@@ -141,7 +141,22 @@ Follow [`docs/testing/AUTOMATED-TEST-STRATEGY.md`](docs/testing/AUTOMATED-TEST-S
 - Production Web Assets: Served at `client/public/assets/` (`manifest.json`, WebP texture atlases, background images)
 - Master High-Res Originals: Retained in `art_raw/` (uncompressed masters for editing/changes)
 - Aesthetic: side-view 2D, cartoon haulers, biome themes; **no isometric**
-- Run python pipeline scripts (`python3 scripts/slice_treasures.py`, etc.) to update or re-slice assets.
+- **Python Pipeline Scripts (`scripts/`)**:
+  - `asset_processor.py` — Core utility module (chroma key background removal, frame scaling, Phaser 3 JSON Hash atlas generator).
+  - `slice_treasures.py` — Slices P0 primary treasures into `atlas_treasures`.
+  - `generate_and_process_treasures_sets.py` — Generates & processes secondary loot sets (Celestial, Divine, Song, Veg, Box) into `atlas_treasures_sets`.
+  - `slice_tiles.py` — Slices MVP tiles, switches, gates, and traps into `atlas_tiles_mvp`.
+  - `process_lava_biome.py` — Generates & packs Lava biome assets into `atlas_tiles_lava`.
+  - `generate_ice_biome.py` — Generates & packs Ice biome assets into `atlas_tiles_ice`.
+  - `process_cavern_tiles.py` — Generates & packs Cavern biome assets into `atlas_tiles_cavern`.
+  - `generate_mist_pack.py` — Generates & packs Mist biome assets into `atlas_tiles_mist`.
+  - `generate_and_process_enemies_traps.py` — Generates & packs Golem, Phantom, Lightning, Gas, Rock into `atlas_enemies`.
+  - `generate_ui_icons_pack.py` — Generates & packs D-pad/buttons, medals, badges, and spinner loop into `atlas_ui_icons`.
+  - `generate_and_process_vfx.py` — Generates & packs particle VFX sheets (stun stars, spill, flashes, dust, poof) into `atlas_vfx`.
+  - `slice_characters.py` — Slices 4 character animation sheets (Gnome, Sprite, Halfling, Dwarf) into `char_*` atlases.
+  - `generate_char_extras.py` — Generates & packs Title stick walk-ins, Argue/Rummage poses into `atlas_char_extras`.
+  - `generate_and_process_level_props.py` — Generates & packs background props (torches, banners, candelabras, grates) into `atlas_level_props`.
+  - `process_screens.py` — Resizes and converts screen background artwork to 960×540 WebP images.
 
 ### Documentation hygiene
 
