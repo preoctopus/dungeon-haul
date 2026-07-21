@@ -95,12 +95,20 @@ export interface InventoryValueResult {
   setCompletions: SetCompletion[];
 }
 
-/** Context passed to treasure rolls (excluded live uniques, set hints…). */
+/** Context passed to treasure rolls (DESIGN §6.6). */
 export interface RollContext {
-  /** Unique/set defs already live in the world or held — never re-rolled. */
-  excludedDefIds?: string[];
-  /** For magic chests: piece ids that would complete an almost-done set. */
-  preferredSetPieceDefIds?: string[];
+  /** Currently recovered unique/set def ids in play. */
+  partyHeldDefIds?: readonly string[];
+  /** Unique/set defs that cannot roll (live in world or held). */
+  excludedDefIds?: readonly string[];
+  /** For magic chests: sets that are one piece away from completion. */
+  almostCompleteSets?: readonly { setId: string; missingDefId: string }[];
+}
+
+/** Per-seat inventory input for computeInventoryValue (owner attribution). */
+export interface SeatInventory {
+  seatId: SeatId;
+  items: readonly TreasureInstance[];
 }
 
 // ---------------------------------------------------------------------------
@@ -193,6 +201,9 @@ export interface PlayerStats {
   goatOnPole: boolean;
   /** Success! — completed exit (not stuck/quit mid-run). */
   successfullyExited: boolean;
+
+  /** Exit rank on the final level: 0 = first out … 3 = last out (§10.3). */
+  finalExitRank?: number;
 }
 
 export interface ScoreSeat {
