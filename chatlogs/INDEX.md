@@ -1,0 +1,69 @@
+# chatlogs index
+
+Both-sides conversation exports for `/Users/atarzwell/src/dhaul4`, ordered by start time (oldest first).
+
+| # | Started (local) | Agent | Source session id | File |
+|---:|---|---|---|---|
+| 01 | 2026-07-20 21:43:29 | grok | `019f8257-a18a-7da1-b648-3119ec560f1c` | `01-grok.jsonl` |
+| 02 | 2026-07-20 22:00:12 | grok | `019f8266-f1ec-7623-a933-51283d3bf5d1` | `02-grok.jsonl` |
+| 03 | 2026-07-20 22:11:53 | grok | `019f8271-9b0d-77e2-a21a-d2a191240f8c` | `03-grok.jsonl` |
+| 04 | 2026-07-20 22:11:53 | grok | `019f8271-9b0d-77e2-a21a-d2b11fbee770` | `04-grok.jsonl` |
+| 05 | 2026-07-20 22:11:53 | grok | `019f8271-9b0d-77e2-a21a-d2ef9f2b0f38` | `05-grok.jsonl` |
+| 06 | 2026-07-20 22:11:53 | grok | `019f8271-9b0d-77e2-a21a-d3088d39b0ea` | `06-grok.jsonl` |
+| 07 | 2026-07-20 22:11:53 | grok | `019f8271-9b0d-77e2-a21a-d2dc6af75e10` | `07-grok.jsonl` |
+| 08 | 2026-07-20 22:11:53 | grok | `019f8271-9b0d-77e2-a21a-d2ffdd740cf3` | `08-grok.jsonl` |
+| 09 | 2026-07-20 22:11:53 | grok | `019f8271-9b0d-77e2-a21a-d2cf2c6f0134` | `09-grok.jsonl` |
+| 10 | 2026-07-20 22:11:53 | grok | `019f8271-9b0d-77e2-a21a-d32bf2e0f005` | `10-grok.jsonl` |
+| 11 | 2026-07-20 22:11:53 | grok | `019f8271-9b0d-77e2-a21a-d31f934138a1` | `11-grok.jsonl` |
+| 12 | 2026-07-20 22:11:53 | grok | `019f8271-9b0d-77e2-a21a-d33bcb245fff` | `12-grok.jsonl` |
+| 13 | 2026-07-20 22:19:48 | grok | `019f8278-e066-7e72-ae28-0e462fba49b7` | `13-grok.jsonl` |
+| 14 | 2026-07-20 22:19:48 | grok | `019f8278-e066-7e72-ae28-0e5cfe2a779e` | `14-grok.jsonl` |
+| 15 | 2026-07-20 22:29:02 | claude | `d1121d38-d346-4a43-a077-06b451d924f0` | `15-claude.jsonl` |
+| 16 | 2026-07-20 22:44:01 | claude | `subagent-agent-a21dd218d59ce4247` | `16-claude.jsonl` |
+| 17 | 2026-07-20 22:52:58 | claude | `subagent-agent-a128da9ef02a284dc` | `17-claude.jsonl` |
+| 18 | 2026-07-20 22:53:22 | claude | `subagent-agent-afb0d35d2494e65d3` | `18-claude.jsonl` |
+| 19 | 2026-07-20 23:17:42 | claude | `subagent-agent-af052f8ab586c6016` | `19-claude.jsonl` |
+| 20 | 2026-07-20 23:49:43 | antigravity | `77b1a62e-1d14-46db-8a1d-5bad7d26320f` | `20-antigravity.jsonl` |
+| 21 | 2026-07-21 00:13:12 | antigravity | `033df371-4c02-4956-bd38-182df5521245` | `21-antigravity.jsonl` |
+| 22 | 2026-07-21 00:25:48 | antigravity | `7aaf9427-ce9a-4af4-9da7-51232f9aaa6e` | `22-antigravity.jsonl` |
+| 23 | 2026-07-21 00:25:49 | antigravity | `4c684113-605b-4c27-a851-f5f2d2201713` | `23-antigravity.jsonl` |
+| 24 | 2026-07-21 00:25:49 | antigravity | `7273e2d0-6bdd-4f66-bb4d-af76184dc543` | `24-antigravity.jsonl` |
+| 25 | 2026-07-21 00:25:50 | antigravity | `0e8cb73a-0dc9-4af3-9f3a-b5e3a5511c59` | `25-antigravity.jsonl` |
+| 26 | 2026-07-21 00:25:51 | antigravity | `3eb1960f-248b-4456-84bf-2da7921132e8` | `26-antigravity.jsonl` |
+| 27 | 2026-07-21 00:30:54 | antigravity | `93d551fc-952f-4ba9-82ee-3abb67d0bc9f` | `27-antigravity.jsonl` |
+| 28 | 2026-07-21 00:30:54 | antigravity | `057b1bde-5325-4659-9cae-6215ea4ed165` | `28-antigravity.jsonl` |
+| 29 | 2026-07-21 00:30:55 | antigravity | `dcaad2f9-a59f-4eba-af9b-19914d80e9cf` | `29-antigravity.jsonl` |
+| 30 | 2026-07-21 00:30:56 | antigravity | `eb202ef2-41f5-48b7-991b-98cafedb21b6` | `30-antigravity.jsonl` |
+| 31 | 2026-07-21 00:30:56 | antigravity | `915401dd-3725-4574-b408-43c7cb6b7e11` | `31-antigravity.jsonl` |
+| 32 | 2026-07-21 00:35:56 | claude | `subagent-agent-a7f86e0c548dc711d` | `32-claude.jsonl` |
+| 33 | 2026-07-21 00:41:39 | claude | `subagent-agent-af7bb51102765622c` | `33-claude.jsonl` |
+| 34 | 2026-07-21 00:42:16 | antigravity | `d78e7f30-f3eb-416d-abec-446ba92141b7` | `34-antigravity.jsonl` |
+| 35 | 2026-07-21 01:01:35 | antigravity | `bbb488c1-9883-48b3-91b3-a6c7c5ebdcee` | `35-antigravity.jsonl` |
+| 36 | 2026-07-21 01:02:00 | antigravity | `5469be3f-d3e5-4d07-9160-7142e4d631ab` | `36-antigravity.jsonl` |
+| 37 | 2026-07-21 01:02:01 | antigravity | `112b2840-3b57-4859-9cc9-e7737ca07a07` | `37-antigravity.jsonl` |
+| 38 | 2026-07-21 01:02:01 | antigravity | `57f6bcbd-97f5-4a04-be71-aac6b670ae1d` | `38-antigravity.jsonl` |
+| 39 | 2026-07-21 01:02:02 | antigravity | `b7aa9021-f5eb-4e37-9c7b-54d4c8e42125` | `39-antigravity.jsonl` |
+| 40 | 2026-07-21 01:02:02 | antigravity | `efc7e134-e5e5-4e29-bb45-78a094f42b11` | `40-antigravity.jsonl` |
+| 41 | 2026-07-21 01:02:03 | antigravity | `7edecaa1-bf2d-4961-8d61-3d764d71f7e9` | `41-antigravity.jsonl` |
+| 42 | 2026-07-21 01:02:04 | antigravity | `de85eafb-8c47-4077-b6f4-ea924b9eccd6` | `42-antigravity.jsonl` |
+| 43 | 2026-07-21 01:02:05 | antigravity | `9d33c6fb-6443-4f40-865b-94a6cd8f9a8e` | `43-antigravity.jsonl` |
+| 44 | 2026-07-21 01:02:05 | antigravity | `555feb14-da09-411d-bc8a-89c36f0e204d` | `44-antigravity.jsonl` |
+| 45 | 2026-07-21 01:02:06 | antigravity | `8bda669a-b9d6-4486-9978-9d1b9e31a002` | `45-antigravity.jsonl` |
+| 46 | 2026-07-21 01:09:16 | antigravity | `f1bc2144-9deb-4210-a6ba-d65599ed8541` | `46-antigravity.jsonl` |
+| 47 | 2026-07-21 01:09:16 | antigravity | `3e3a0539-6892-464e-ae17-9db173587878` | `47-antigravity.jsonl` |
+| 48 | 2026-07-21 01:09:17 | antigravity | `26c4cebb-46cd-47b6-bfbc-f219db299c85` | `48-antigravity.jsonl` |
+| 49 | 2026-07-21 01:09:17 | antigravity | `bd4b5266-a862-47d6-a350-05354bbaa596` | `49-antigravity.jsonl` |
+| 50 | 2026-07-21 01:09:18 | antigravity | `b58d0b19-7285-405f-9ad3-519878dceba4` | `50-antigravity.jsonl` |
+| 51 | 2026-07-21 01:09:18 | antigravity | `5eb3b3cc-a0e3-4ac5-a1d8-6705811833f1` | `51-antigravity.jsonl` |
+| 52 | 2026-07-21 01:19:14 | antigravity | `9e023e43-7681-471a-b371-2989678c1ef5` | `52-antigravity.jsonl` |
+| 53 | 2026-07-21 01:24:12 | antigravity | `f6c88c79-5d7f-4165-ab27-69aac5a93c64` | `53-antigravity.jsonl` |
+| 54 | 2026-07-21 01:24:12 | antigravity | `eeba37e8-05c2-422c-a8bd-3622b5b1b49b` | `54-antigravity.jsonl` |
+| 55 | 2026-07-21 01:24:13 | antigravity | `d4e285f0-0e4f-4530-9384-3d37b7522cce` | `55-antigravity.jsonl` |
+| 56 | 2026-07-21 01:24:13 | antigravity | `8143fc78-c2ea-492d-a951-f7f729eb03c1` | `56-antigravity.jsonl` |
+| 57 | 2026-07-21 01:25:57 | antigravity | `f2a6ddd5-02e8-4e74-a5c0-a6a5fc5c570a` | `57-antigravity.jsonl` |
+| 58 | 2026-07-21 01:25:58 | antigravity | `56d531e1-cbb3-426d-87cb-9dd87e9c3a95` | `58-antigravity.jsonl` |
+| 59 | 2026-07-21 01:25:58 | antigravity | `dd73b09d-fe0d-46d2-96cf-71882b90a035` | `59-antigravity.jsonl` |
+| 60 | 2026-07-21 01:32:03 | grok | `019f8328-e47d-77b1-923f-16c864c88671` | `60-grok.jsonl` |
+| 61 | 2026-07-21 02:02:01 | claude | `239fd9c0-74ec-4994-9f2a-be00372d201b` | `61-claude.jsonl` |
+| 62 | 2026-07-21 01:35:04 | pi | `019f832b-a901-7fd2-8570-cd95361b66dc` | `62-pi.jsonl` |
+| 63 | 2026-07-21 01:47:39 | pi | `019f8337-2f2a-77db-ad56-19f517987adc` | `63-pi.jsonl` |

@@ -17,7 +17,7 @@ dist/
 *.log
 .DS_Store
 coverage/
-chatlogs/
+chatlogs.old/
 
 # Python
 __pycache__/
