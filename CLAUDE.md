@@ -135,7 +135,8 @@ Follow [`docs/testing/AUTOMATED-TEST-STRATEGY.md`](docs/testing/AUTOMATED-TEST-S
 
 ### Art / audio
 
-- Asset inventory: [`docs/art/ASSET-INVENTORY.md`](docs/art/ASSET-INVENTORY.md)
+- Asset Inventory & Spec: [`docs/art/ASSET-INVENTORY.md`](docs/art/ASSET-INVENTORY.md)
+- Asset Production & Completion Status: [`docs/art/ASSET-STATUS.md`](docs/art/ASSET-STATUS.md)
 - Asset Pipeline & Phaser 3 Developer Guide: [`docs/art/PIPELINE-AND-PHASER-GUIDE.md`](docs/art/PIPELINE-AND-PHASER-GUIDE.md)
 - Production Web Assets: Served at `client/public/assets/` (`manifest.json`, WebP texture atlases, background images)
 - Master High-Res Originals: Retained in `art_raw/` (uncompressed masters for editing/changes)
