@@ -1,8 +1,6 @@
-import { serve } from "@hono/node-server";
-import { createApp } from "./app.js";
+import { startGameServer } from "./gameServer.js";
 
-const port = Number(process.env["PORT"] ?? 8080);
-
-serve({ fetch: createApp().fetch, port }, (info) => {
-  console.log(`dhaul server listening on :${info.port}`);
+startGameServer().catch((err) => {
+  console.error("fatal: server failed to start", err);
+  process.exit(1);
 });
