@@ -57,7 +57,7 @@
 |---|---|---|
 | `C2S_Input` | `{ type, seatId, command: InputCommand }` | Rate-limited; seat must match token |
 | `C2S_Ready` | `{ type, ready: bool }` | Lobby / Instructions |
-| `C2S_ClaimCharacter` | `{ type, character: CharacterId }` | Lobby; may fail if taken (policy) |
+| `C2S_ClaimCharacter` | `{ type, character: CharacterId }` | Lobby; always succeeds for valid id (Q9 soft-unique — duplicates allowed; client may warn) |
 | `C2S_Leave` | `{ type }` | Graceful |
 | `C2S_Ping` | `{ type, clientTime: number }` | RTT measurement |
 | `C2S_EndSkip` | `{ type }` | Skip cinematic segment if allowed |
@@ -97,6 +97,7 @@
   phase: SessionPhase
   levelId?: string
   levelsCompleted: number
+  levelsAfterHoard: number     // run length config (Q8); lets UI render "Level k / n" (delta #4)
   lastProcessedInputSeq: { [seatId: number]: number }
   haulers: HaulerPublic[]
   treasures: TreasurePublic[]
@@ -160,6 +161,37 @@
     eligibleForHighScore: bool
   }[]
   completionToken: string       // for score submit
+  cinema?: EndCinemaData        // presentation-only end cinematic data (accepted delta #2)
+  recordFanfareThresholdGp?: number  // top totalHaulGp on board; omit → client skips fanfare (delta #3)
+}
+```
+
+### `EndCinemaData` (presentation-only; server-authored)
+
+All GP values must match the rules evaluation used for `totalTreasureGp` / takes.
+Clients must not re-derive official values from `defId`.
+
+```text
+{
+  tossOrderSeatIds: number[]     // slowest → fastest (len 4)
+  exitOrderSeatIds: number[]     // first exit → last on final level
+  players: {
+    seatId: number
+    items: {
+      instanceId: string
+      defId: string
+      displayName: string
+      valueGp: number
+      setId?: string
+    }[]
+  }[]
+  setCompletions: {
+    setId: string
+    displayName: string
+    bonusGp: number
+    contributorSeatIds: number[]
+    completingInstanceId: string   // which toss triggers the popout
+  }[]
 }
 ```
 

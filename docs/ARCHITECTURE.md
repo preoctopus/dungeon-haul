@@ -344,7 +344,7 @@ HaulerSlot {
 Track across entire session (design §2.3):
 
 - `exitsFirstCount`, `exitsLastCount`
-- `treasureRecoveredValue`, `treasureLostCount`
+- `treasureRecoveredValueGp`, `treasureLostCount`
 - `itemsHauledCount`, `setPiecesRecovered`
 - `airTimeTicks`, `groundTimeTicks`
 - `trapsHit`, `hitsDealt`, `hitsTaken`
@@ -500,7 +500,7 @@ InputCommand {
 3. **Logical canvas 960×540**, pixel-art integer scale, letterboxed.
 4. **Level progression MVP:** Hoard + linear two-choice forks from a small pool; full 19-node path graph is stretch (design alternative of random unplayed levels is acceptable).
 5. **Block size** unspecified in design (“xx pixels”) — assume **32×32** world blocks until art decides.
-6. **Title “10s → High Scores”** vs **Title → Credits → High Scores** idle loop: implement **Title → Credits → High Scores** attract chain; any button returns to Title; Start opens Lobby.
+6. **Title “10s → High Scores”** vs **Title → Credits → High Scores** idle loop: implement **Title → Credits → High Scores** attract chain; any button returns to Title; Start opens Lobby. **Decided 2026-07-20:** Title idles **10s** → Credits (5s) → High Scores → Title.
 7. **Pause:** online pause is **local UI only** (does not freeze server) or vote-pause stretch; MVP = no global pause.
 8. **High scores** are global persistent (DB), not only local machine.
 9. **AI absent on Instructions** per design; AI active from Hoard onward for empty seats.

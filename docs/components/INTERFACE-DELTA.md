@@ -1,6 +1,8 @@
 # Interface delta proposals (SE-1)
 
-**Status:** Proposal only — does not change frozen contracts until architect accepts.  
+**Status:** ✅ **ACCEPTED 2026-07-20** (all four proposals) — applied to
+[lobby-and-scores.md](../interfaces/lobby-and-scores.md) and
+[netcode-messages.md](../interfaces/netcode-messages.md). Kept for history.  
 **Scope:** Gaps found while designing **C-01 Client Shell** and **C-11 End Screen Director**.  
 **Stack:** No stack changes. Phaser3+TS client, Colyseus server, existing packages remain.
 

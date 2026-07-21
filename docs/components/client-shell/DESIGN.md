@@ -377,6 +377,6 @@ Canonical architecture: **Start opens Lobby**, not Instructions. Solo/dev may au
 
 - Phaser scene plugins vs pure TS controllers for Lobby forms.
 - Whether Connecting is a Scene or DOM/Phaser overlay (prefer overlay to avoid tearing down Level).
-- Exact Title idle duration before Credits (recommend **10s** to honor design intent while keeping Credits in chain).
+- ~~Exact Title idle duration before Credits~~ **Decided 2026-07-20: 10s** (Title 10s → Credits 5s → High Scores → Title; honors design intent while keeping Credits in chain).
 
 These do not change frozen product decisions or published wire contracts.

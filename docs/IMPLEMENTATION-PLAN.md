@@ -116,7 +116,7 @@ Related: [ARCHITECTURE.md](ARCHITECTURE.md), [COMPONENTS.md](COMPONENTS.md), [in
 - End Director consumes `ScoreReport` (cinematics can be staged)
 - Attract idle loop
 
-**Owners:** SE-1, SE-5 phase machine, SE-11/C-11, SE-2
+**Owners:** SE-1 (incl. C-11), SE-5 phase machine, SE-2
 
 **Exit:** Four humans (or 1+AI) complete configured run and see takes.
 

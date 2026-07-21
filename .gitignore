@@ -1,2 +1,19 @@
 .claude/
 .tokensave/
+
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+*.tsbuildinfo
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# Logs & misc
+*.log
+.DS_Store
+coverage/

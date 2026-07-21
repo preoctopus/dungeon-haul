@@ -1,0 +1,22 @@
+{
+  "name": "@dhaul/server",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Dungeon Haul server — lobby REST + (later) Colyseus game rooms. P0: health endpoint only.",
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch --experimental-strip-types src/main.ts",
+    "start": "node dist/main.js",
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint src test",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.14.0",
+    "hono": "^4.8.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0"
+  }
+}

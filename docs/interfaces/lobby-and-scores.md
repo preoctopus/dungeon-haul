@@ -71,6 +71,7 @@ Public lobby view (no tokens).
   "phase": SessionPhase
   "seats": SeatStatus[4]
   "levelsCompleted": number
+  "levelsAfterHoard": number
 }
 ```
 
@@ -95,7 +96,7 @@ Preferred via WS `C2S_ClaimCharacter`. Optional REST:
 Headers: `Authorization: Seat <seatToken>`  
 Body: `{ "character": CharacterId }`
 
-**Policy (assumption):** unique characters preferred; if taken, `409 CONFLICT`.
+**Policy (frozen Q9 — soft-unique):** Claim always succeeds for a valid `CharacterId`; seats may share a character. Client may warn when selecting an already-claimed character. `409` is reserved for true conflicts (e.g. double seat bind), never "character taken".
 
 ---
 
