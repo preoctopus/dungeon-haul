@@ -26,12 +26,12 @@ importers:
 
   client:
     dependencies:
-      '@colyseus/sdk':
-        specifier: ^0.17.43
-        version: 0.17.43(@colyseus/core@0.17.44)(typescript@5.9.3)
       '@dhaul/protocol':
         specifier: workspace:*
         version: link:../packages/protocol
+      colyseus.js:
+        specifier: ^0.16.22
+        version: 0.16.22
       phaser:
         specifier: ^3.90.0
         version: 3.90.0
@@ -130,8 +130,16 @@ packages:
   '@colyseus/greeting-banner@3.0.8':
     resolution: {integrity: sha512-k5UcCfgtxkL0nyIJPZm7CkoiCpY8afUgeYcj7Z2tJFp0Z74m7YHgv3qVhFEQYvp+BvweRiHjhEhaDxYQFTC7hA==}
 
+  '@colyseus/httpie@2.0.1':
+    resolution: {integrity: sha512-JvABMZzPLiyrUsVj3ElXGORRDTu+NKzXHWd1uV1R1SThAKMm06cVW6bOyADARD65bs8JJoHNNbUkW8KoRvRDzA==}
+    engines: {node: '>=10'}
+
   '@colyseus/msgpackr@1.11.3':
     resolution: {integrity: sha512-P86w/FrZWUaV7StxI7WuNg3wFlUrROSiBOrF378wyOgxS5+etcxUQMPe0OJZDEx+QUdu7QOPzsqE0Ziqwpjnug==}
+
+  '@colyseus/schema@3.0.76':
+    resolution: {integrity: sha512-i+ceBZyhB7lTn5+BoG/xxYfzW4dKKyLOywsGKVgXHe9fD905AS/Lk180jd1bICEJhebGeiRXEQ2YUPl/xwFg2g==}
+    hasBin: true
 
   '@colyseus/schema@4.0.27':
     resolution: {integrity: sha512-efHmlcdA2jdNpzqHps6+IbNrRwfliMqqUuh8nzZtRY7idRrXWb6sS6y8exHXTWF6c9esZr1Be76J/11o4R31cQ==}
@@ -754,6 +762,10 @@ packages:
 
   color-name@1.1.4:
     resolution: {integrity: sha512-dOy+3AuW3a2wNbZHIuMZpTcgjGuLU/uBL/ubcZF9OXbDo8ff4O8yVp5Bf0efS8uEoYo5q4Fx7dY9OgQGXgAsQA==}
+
+  colyseus.js@0.16.22:
+    resolution: {integrity: sha512-xyiajukHvlwOtcziVbXZWmz7yBH3EImovYrGPAe2kVkdubLVYmOjskJuXh2VLlO8XGjyhmNwig9ELz18sTUo9g==}
+    engines: {node: '>= 12.x'}
 
   concat-map@0.0.1:
     resolution: {integrity: sha512-/Srv4dswyQNBfohGpz9o6Yb3Gz3SrUDqBH5rTuhGR7ahtlbYKnVxw2bCFMRljaA7EXHaXZ8wsHdodFvbkhKmqg==}
@@ -1521,9 +1533,13 @@ snapshots:
 
   '@colyseus/greeting-banner@3.0.8': {}
 
+  '@colyseus/httpie@2.0.1': {}
+
   '@colyseus/msgpackr@1.11.3':
     optionalDependencies:
       msgpackr-extract: 3.0.4
+
+  '@colyseus/schema@3.0.76': {}
 
   '@colyseus/schema@4.0.27(typescript@5.9.3)':
     dependencies:
@@ -2054,6 +2070,17 @@ snapshots:
       color-name: 1.1.4
 
   color-name@1.1.4: {}
+
+  colyseus.js@0.16.22:
+    dependencies:
+      '@colyseus/httpie': 2.0.1
+      '@colyseus/msgpackr': 1.11.3
+      '@colyseus/schema': 3.0.76
+      tslib: 2.8.1
+      ws: 8.21.1
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
 
   concat-map@0.0.1: {}
 

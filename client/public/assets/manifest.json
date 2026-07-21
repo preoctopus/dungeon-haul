@@ -1,0 +1,87 @@
+{
+  "name": "Dungeon Haul Asset Manifest",
+  "version": "1.0.0",
+  "atlases": [
+    {
+      "key": "atlas_treasures",
+      "texture": "assets/atlases/atlas_treasures.webp",
+      "atlas": "assets/atlases/atlas_treasures.json"
+    },
+    {
+      "key": "atlas_tiles_mvp",
+      "texture": "assets/atlases/atlas_tiles_mvp.webp",
+      "atlas": "assets/atlases/atlas_tiles_mvp.json"
+    },
+    {
+      "key": "char_gnome",
+      "texture": "assets/atlases/char_gnome.webp",
+      "atlas": "assets/atlases/char_gnome.json"
+    },
+    {
+      "key": "char_sprite",
+      "texture": "assets/atlases/char_sprite.webp",
+      "atlas": "assets/atlases/char_sprite.json"
+    },
+    {
+      "key": "char_halfling",
+      "texture": "assets/atlases/char_halfling.webp",
+      "atlas": "assets/atlases/char_halfling.json"
+    },
+    {
+      "key": "char_dwarf",
+      "texture": "assets/atlases/char_dwarf.webp",
+      "atlas": "assets/atlases/char_dwarf.json"
+    },
+    {
+      "key": "atlas_tiles_lava",
+      "texture": "assets/atlases/atlas_tiles_lava.webp",
+      "atlas": "assets/atlases/atlas_tiles_lava.json"
+    },
+    {
+      "key": "atlas_tiles_ice",
+      "texture": "assets/atlases/atlas_tiles_ice.webp",
+      "atlas": "assets/atlases/atlas_tiles_ice.json"
+    },
+    {
+      "key": "atlas_enemies",
+      "texture": "assets/atlases/atlas_enemies.webp",
+      "atlas": "assets/atlases/atlas_enemies.json"
+    },
+    {
+      "key": "atlas_tiles_mist",
+      "texture": "assets/atlases/atlas_tiles_mist.webp",
+      "atlas": "assets/atlases/atlas_tiles_mist.json"
+    },
+    {
+      "key": "atlas_tiles_cavern",
+      "texture": "assets/atlases/atlas_tiles_cavern.webp",
+      "atlas": "assets/atlases/atlas_tiles_cavern.json"
+    }
+  ],
+  "images": [
+    {
+      "key": "bg_title",
+      "path": "assets/images/bg_title.webp"
+    },
+    {
+      "key": "bg_hoard",
+      "path": "assets/images/bg_hoard.webp"
+    },
+    {
+      "key": "bg_dungeon",
+      "path": "assets/images/bg_dungeon.webp"
+    },
+    {
+      "key": "bg_fork",
+      "path": "assets/images/bg_fork.webp"
+    },
+    {
+      "key": "ui_end_scoring",
+      "path": "assets/images/ui_end_scoring.webp"
+    },
+    {
+      "key": "ui_instructions_hs",
+      "path": "assets/images/ui_instructions_hs.webp"
+    }
+  ]
+}

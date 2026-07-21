@@ -135,10 +135,12 @@ Follow [`docs/testing/AUTOMATED-TEST-STRATEGY.md`](docs/testing/AUTOMATED-TEST-S
 
 ### Art / audio
 
-- Specs only until generation is requested: [`docs/art/ASSET-INVENTORY.md`](docs/art/ASSET-INVENTORY.md)
+- Asset inventory: [`docs/art/ASSET-INVENTORY.md`](docs/art/ASSET-INVENTORY.md)
+- Asset Pipeline & Phaser 3 Developer Guide: [`docs/art/PIPELINE-AND-PHASER-GUIDE.md`](docs/art/PIPELINE-AND-PHASER-GUIDE.md)
+- Production Web Assets: Served at `client/public/assets/` (`manifest.json`, WebP texture atlases, background images)
+- Master High-Res Originals: Retained in `art_raw/` (uncompressed masters for editing/changes)
 - Aesthetic: side-view 2D, cartoon haulers, biome themes; **no isometric**
-- Use placeholder atlas keys from presentation design until real assets land
-- Do not bulk-generate binary assets unless the user asks
+- Run python pipeline scripts (`python3 scripts/slice_treasures.py`, etc.) to update or re-slice assets.
 
 ### Documentation hygiene
 
