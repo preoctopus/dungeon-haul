@@ -2,7 +2,7 @@
   "name": "@dhaul/server",
   "version": "0.1.0",
   "private": true,
-  "description": "Dungeon Haul server — lobby REST (Hono) + Colyseus HaulSession rooms + authoritative movement sim. P2: netcode slice on box_level.",
+  "description": "Dungeon Haul server — lobby REST (Hono) + Colyseus HaulSession rooms + authoritative sim (P2 movement, P3 gameplay + AI).",
   "type": "module",
   "scripts": {
     "dev": "npm run build && node --enable-source-maps dist/main.js",
@@ -15,8 +15,10 @@
   "dependencies": {
     "@colyseus/core": "^0.17.44",
     "@colyseus/ws-transport": "^0.17.13",
+    "@dhaul/ai": "workspace:*",
     "@dhaul/levels": "workspace:*",
     "@dhaul/protocol": "workspace:*",
+    "@dhaul/rules": "workspace:*",
     "@hono/node-server": "^1.14.0",
     "express": "^5.2.1",
     "hono": "^4.8.0"

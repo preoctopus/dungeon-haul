@@ -1,11 +1,11 @@
 /**
- * Pure hauler movement kinematics — P2 subset (run / jump / air-steer /
- * gravity / AABB vs solid grid). No treasure, traps, encumbrance, or
- * surface-friction variants yet.
+ * Pure hauler movement kinematics (run / jump / air-steer / gravity / AABB
+ * vs solid grid). Optional encumbrance + surface multipliers live on
+ * {@link MoveInput}; client prediction may omit them until shared package.
  *
- * KEEP IN SYNC with client/src/net/kinematics.ts (verbatim copy for
- * prediction parity, per netcode-client DESIGN §8.1 / §16 — extraction into
- * a shared package is a P3+ cleanup). This file must stay dependency-free.
+ * KEEP IN SYNC with client/src/net/kinematics.ts (prediction parity, per
+ * netcode-client DESIGN §8.1 / §16 — shared package is a later cleanup).
+ * This file must stay dependency-free.
  *
  * Coordinates: world pixels, y-down (docs/interfaces/level-format.md).
  * Fixed timestep only — dt comes from config, never wall clock.
@@ -81,6 +81,14 @@ export function createBody(x: number, y: number): HaulerBody {
 export interface MoveInput {
   moveX: -1 | 0 | 1;
   jump: boolean;
+  /** Encumbrance speed scale (0..1). Omit or 1 = full speed. */
+  speedMultiplier?: number;
+  /** Encumbrance jump scale (0..1). Omit or 1 = full jump. */
+  jumpMultiplier?: number;
+  /** Surface friction scale for ground deceleration. Omit or 1 = brick. */
+  frictionMultiplier?: number;
+  /** Surface max-speed scale. Omit or 1 = default max. */
+  maxSpeedMultiplier?: number;
 }
 
 export const NEUTRAL_INPUT: MoveInput = { moveX: 0, jump: false };
@@ -193,18 +201,30 @@ export function stepHauler(
   }
   body.jumpHeld = input.jump;
 
+  // Encumbrance + surface modifiers (default 1 = no change).
+  const sMul = input.speedMultiplier ?? 1;
+  const jMul = input.jumpMultiplier ?? 1;
+  const fMul = input.frictionMultiplier ?? 1;
+  const msMul = input.maxSpeedMultiplier ?? 1;
+  const effMaxSpeed = cfg.maxSpeed * sMul * msMul;
+  const effFriction = cfg.groundFriction * fMul;
+
   // Horizontal accel / friction.
   if (input.moveX !== 0) {
     const accel = body.grounded ? cfg.runAccel : cfg.airAccel;
-    body.vx = moveToward(body.vx, input.moveX * cfg.maxSpeed, accel * cfg.dt);
+    body.vx = moveToward(body.vx, input.moveX * effMaxSpeed, accel * cfg.dt);
     body.facing = input.moveX;
   } else if (body.grounded) {
-    body.vx = moveToward(body.vx, 0, cfg.groundFriction * cfg.dt);
+    body.vx = moveToward(body.vx, 0, effFriction * cfg.dt);
+  }
+  // Clamp to effective max (encumbrance may have reduced it mid-tick).
+  if (Math.abs(body.vx) > effMaxSpeed) {
+    body.vx = Math.sign(body.vx) * effMaxSpeed;
   }
 
   // Jump consume + gravity.
   if (body.grounded && body.jumpBuffer > 0) {
-    body.vy = -cfg.jumpSpeed;
+    body.vy = -cfg.jumpSpeed * jMul;
     body.grounded = false;
     body.jumpBuffer = 0;
   } else if (body.jumpBuffer > 0) {

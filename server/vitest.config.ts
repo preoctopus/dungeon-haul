@@ -13,6 +13,12 @@ export default defineConfig({
       "@dhaul/levels": fileURLToPath(
         new URL("../packages/levels/src/index.ts", import.meta.url),
       ),
+      "@dhaul/rules": fileURLToPath(
+        new URL("../packages/rules/src/index.ts", import.meta.url),
+      ),
+      "@dhaul/ai": fileURLToPath(
+        new URL("../packages/ai/src/index.ts", import.meta.url),
+      ),
     },
   },
   test: {

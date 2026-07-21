@@ -1,6 +1,10 @@
 /** Adapter: @dhaul/levels LevelDefinition → SolidGrid for kinematics. */
 
-import { CELL_FLAGS, type LevelDefinition } from "@dhaul/levels";
+import {
+  CELL_FLAGS,
+  type CellType,
+  type LevelDefinition,
+} from "@dhaul/levels";
 import type { SolidGrid } from "./kinematics.js";
 
 export function solidGridFromLevel(level: LevelDefinition): SolidGrid {
@@ -23,4 +27,20 @@ export function spawnWorldPos(
   const cell = level.spawns[seatId];
   const bs = level.blockSizePx;
   return { x: cell.x * bs + bs / 2, y: cell.y * bs + bs / 2 };
+}
+
+/**
+ * Cell under the hauler's feet (one px below the AABB bottom). Used for
+ * surface friction (ice/sand) and floor-trap checks.
+ */
+export function footCell(
+  level: LevelDefinition,
+  x: number,
+  y: number,
+  halfH: number,
+): { cx: number; cy: number; cell: CellType | undefined } {
+  const bs = level.blockSizePx;
+  const cx = Math.floor(x / bs);
+  const cy = Math.floor((y + halfH + 1) / bs);
+  return { cx, cy, cell: level.cells[cy]?.[cx] };
 }

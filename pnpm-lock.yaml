@@ -40,6 +40,12 @@ importers:
         specifier: ^7.0.0
         version: 7.3.6(@types/node@24.13.3)
 
+  packages/ai:
+    dependencies:
+      '@dhaul/protocol':
+        specifier: workspace:*
+        version: link:../protocol
+
   packages/levels:
     dependencies:
       pngjs:
@@ -65,12 +71,18 @@ importers:
       '@colyseus/ws-transport':
         specifier: ^0.17.13
         version: 0.17.13(@colyseus/core@0.17.44)(express@5.2.1(supports-color@7.2.0))
+      '@dhaul/ai':
+        specifier: workspace:*
+        version: link:../packages/ai
       '@dhaul/levels':
         specifier: workspace:*
         version: link:../packages/levels
       '@dhaul/protocol':
         specifier: workspace:*
         version: link:../packages/protocol
+      '@dhaul/rules':
+        specifier: workspace:*
+        version: link:../packages/rules
       '@hono/node-server':
         specifier: ^1.14.0
         version: 1.19.14(hono@4.12.31)

@@ -6,17 +6,35 @@ import { Simulation } from "../../src/sim/simulation.js";
 
 const CONTENT_ROOT = fileURLToPath(new URL("../../../content", import.meta.url));
 
-let cached: LevelDefinition | undefined;
+let cachedBox: LevelDefinition | undefined;
+let cachedHoard: LevelDefinition | undefined;
 
 export function boxLevel(): LevelDefinition {
-  if (!cached) {
-    cached = loadLevel(loadContentRoot(CONTENT_ROOT), "box_level");
+  if (!cachedBox) {
+    cachedBox = loadLevel(loadContentRoot(CONTENT_ROOT), "box_level");
   }
-  return cached;
+  return cachedBox;
 }
 
-export function makeSim(config: SimConfig = DEFAULT_SIM_CONFIG): Simulation {
+export function hoardLevel(): LevelDefinition {
+  if (!cachedHoard) {
+    cachedHoard = loadLevel(loadContentRoot(CONTENT_ROOT), "hoard_01");
+  }
+  return cachedHoard;
+}
+
+/** Default test config: AI off so loot/trap tapes aren't stolen by fill seats. */
+export const TEST_SIM_CONFIG: SimConfig = {
+  ...DEFAULT_SIM_CONFIG,
+  enableAi: false,
+};
+
+export function makeSim(config: SimConfig = TEST_SIM_CONFIG): Simulation {
   return new Simulation(boxLevel(), config);
+}
+
+export function makeHoardSim(config: SimConfig = TEST_SIM_CONFIG): Simulation {
+  return new Simulation(hoardLevel(), config);
 }
 
 let seqCounter = 0;

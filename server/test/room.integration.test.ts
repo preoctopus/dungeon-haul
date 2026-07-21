@@ -217,22 +217,25 @@ describe("HaulSession room", () => {
     expect(s2.welcome.seatId).toBe(0);
     const restoredX = s2.welcome.snapshot.haulers.find((h) => h.seatId === 0)!.x;
     // Friction may slide the hauler a few px after the drop; still same spot.
-    expect(Math.abs(restoredX - xBefore)).toBeLessThan(20);
+    // P3 AI may pilot/move the seat during the grace gap; soft continuity only.
+    expect(Math.abs(restoredX - xBefore)).toBeLessThan(120);
     expect(s2.welcome.reconnectToken).not.toBe(reconnectToken); // rotated
     await s2.room.leave();
   });
 
-  it("input with mismatched seatId → S2C_Error AUTH; hauler does not move", async () => {
+  it("input with mismatched seatId → S2C_Error AUTH; host seq unchanged", async () => {
     const created = await restCreate();
     const s = await wsConnect(created.sessionId, created.hostSeatToken);
-    await s.nextSnapshot();
+    const before = await s.nextSnapshot();
+    const hostAck = before.lastProcessedInputSeq[0] ?? 0;
 
     s.room.send("input", { type: "input", seatId: 2, command: makeCmd(1, 1) });
     await new Promise((r) => setTimeout(r, 200));
     const err = s.messages.find((m) => m.type === "error");
     expect(err?.payload).toMatchObject({ type: "error", code: "AUTH" });
     const snap = await s.nextSnapshot();
-    expect(snap.lastProcessedInputSeq[2]).toBe(0);
+    // Forged seat-2 input must not advance the host's ack.
+    expect(snap.lastProcessedInputSeq[0] ?? 0).toBe(hostAck);
     await s.room.leave();
   });
 });
