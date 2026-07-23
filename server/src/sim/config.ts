@@ -63,6 +63,11 @@ export interface SimConfig {
    * that isolate human/loot/trap behavior. Production leaves this true.
    */
   enableAi: boolean;
+  /**
+   * Ticks the fork phase holds before auto-resolving (C06-T24). Real vote
+   * tallying/UI is C-10; this is a stub timer until that component lands.
+   */
+  forkDurationTicks: number;
 }
 
 export const DEFAULT_SIM_CONFIG: SimConfig = {
@@ -95,4 +100,5 @@ export const DEFAULT_SIM_CONFIG: SimConfig = {
   sand: { friction: 1.6, maxSpeed: 0.65 },
   ai: { ...DEFAULT_AI_CONFIG },
   enableAi: true,
+  forkDurationTicks: 5 * 30, // ~5s stub hold before auto-resolve
 };

@@ -105,6 +105,10 @@ export class Simulation {
   private exitCounter = 0;
   private levelComplete = false;
   private phaseValue: SessionPhase;
+  /** Hoard does not count toward `levelsAfterHoard` (DESIGN §9.3). */
+  private isHoardLevel = false;
+  private levelsCompletedCount = 0;
+  private forkEndsAtTick = 0;
 
   constructor(
     level: LevelDefinition,
@@ -170,11 +174,42 @@ export class Simulation {
     return this.phaseValue;
   }
 
+  /** Count of completed post-Hoard levels this run (DESIGN §9.3). */
+  get levelsCompleted(): number {
+    return this.levelsCompletedCount;
+  }
+
+  /** Whether the currently loaded level is Hoard (excluded from the count). */
+  get isHoard(): boolean {
+    return this.isHoardLevel;
+  }
+
+  /**
+   * Enter the fork phase: freezes physics/AI for `config.forkDurationTicks`
+   * (DESIGN §10.3). Stub auto-resolve timer — real path-vote tallying and
+   * UI is C-10 (fork-vote); the room calls `isForkResolved()` / `loadLevel()`
+   * once C-10 lands to replace this timer with an actual vote result.
+   */
+  enterFork(): void {
+    this.phaseValue = "fork";
+    this.forkEndsAtTick = this.tickCount + this.config.forkDurationTicks;
+  }
+
+  /** True once the fork phase's stub hold timer has elapsed. */
+  isForkResolved(): boolean {
+    return this.phaseValue === "fork" && this.tickCount >= this.forkEndsAtTick;
+  }
+
   /**
    * Load a new level in place, preserving seat inventories/stats/control
    * (DESIGN §9.1). Resets per-level transient state (stun, exit, held input).
    */
-  loadLevel(level: LevelDefinition, phase: SessionPhase): void {
+  loadLevel(
+    level: LevelDefinition,
+    phase: SessionPhase,
+    opts?: { isHoard?: boolean },
+  ): void {
+    this.isHoardLevel = opts?.isHoard ?? false;
     this.level = level;
     this.grid = solidGridFromLevel(level);
     this.exitAABB = { ...level.exit };
@@ -268,6 +303,13 @@ export class Simulation {
   /** Advance exactly one fixed tick. Never call with wall-clock dt. */
   step(): TickResult {
     this.tickCount += 1;
+
+    // Phase-gated physics free-run (DESIGN §10.3): only instructions/level
+    // simulate movement; fork and end_* freeze until the room advances phase.
+    if (this.phaseValue !== "instructions" && this.phaseValue !== "level") {
+      return { snapshot: this.buildSnapshot(), events: [] };
+    }
+
     const events: GameEvent[] = [];
     const kin = this.config.kinematics;
     const cfg = this.config;
@@ -517,6 +559,9 @@ export class Simulation {
           : this.seats.every((s) => s.exited);
       if (allExited) {
         this.levelComplete = true;
+        if (this.phaseValue === "level" && !this.isHoardLevel) {
+          this.levelsCompletedCount++;
+        }
         // Last exit order = highest exitOrder among seats that left.
         for (const seat of this.seats) {
           if (seat.exitOrder === this.exitCounter && this.exitCounter > 0) {
@@ -848,7 +893,7 @@ export class Simulation {
       tick: this.tickCount,
       phase: this.phaseValue,
       levelId: this.level.id,
-      levelsCompleted: 0,
+      levelsCompleted: this.levelsCompletedCount,
       levelsAfterHoard: this.config.levelsAfterHoard,
       lastProcessedInputSeq,
       haulers,

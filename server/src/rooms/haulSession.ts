@@ -15,8 +15,10 @@ import {
   isC2SInput,
   isJoinOptions,
   protocolVersion,
+  type ForkOption,
   type GameEvent,
   type S2C_Error,
+  type S2C_ForkState,
   type S2C_PhaseChange,
   type S2C_Pong,
   type S2C_SeatUpdate,
@@ -24,7 +26,12 @@ import {
   type S2C_Welcome,
   type SeatId,
 } from "@dhaul/protocol";
-import { getLevel, HOARD_LEVEL_ID, INSTRUCTIONS_LEVEL_ID } from "../content.js";
+import {
+  getLevel,
+  HOARD_LEVEL_ID,
+  INSTRUCTIONS_LEVEL_ID,
+  POST_HOARD_LEVEL_ID,
+} from "../content.js";
 import type { LobbyService } from "../lobby/service.js";
 import { DEFAULT_SIM_CONFIG } from "../sim/config.js";
 import { Simulation } from "../sim/simulation.js";
@@ -207,11 +214,19 @@ export class HaulSession extends Room {
     }
 
     if (this.sim.phase === "instructions" && this.sim.isLevelComplete()) {
-      this.sim.loadLevel(getLevel(HOARD_LEVEL_ID), "level");
-      const phaseChange: S2C_PhaseChange = { type: "phase_change", phase: "level" };
-      this.broadcast("phase_change", phaseChange);
-      this.broadcast("snapshot", { type: "snapshot", snapshot: this.sim.buildSnapshot() });
-      this.broadcastSeatUpdate();
+      this.sim.loadLevel(getLevel(HOARD_LEVEL_ID), "level", { isHoard: true });
+      this.broadcastPhaseChange("level");
+    } else if (this.sim.phase === "level" && this.sim.isLevelComplete()) {
+      // Hoard always forks; post-hoard levels fork until levelsAfterHoard,
+      // then end (C06-T24). End scoring itself is C06-T26, not yet wired.
+      if (this.sim.isHoard || this.sim.levelsCompleted < this.sim.config.levelsAfterHoard) {
+        this.enterFork();
+      } else {
+        this.broadcastPhaseChange("end_count");
+      }
+    } else if (this.sim.phase === "fork" && this.sim.isForkResolved()) {
+      this.sim.loadLevel(getLevel(POST_HOARD_LEVEL_ID), "level");
+      this.broadcastPhaseChange("level");
     }
 
     // Tick lag metric (Implementation Plan P2 exit criterion).
@@ -222,6 +237,34 @@ export class HaulSession extends Room {
         `[haul_session ${this.sessionId}] tick=${snapshot.tick} lagMs=${lagMs} clients=${this.clients.length}`,
       );
     }
+  }
+
+  /**
+   * Enter the fork phase and broadcast a stub `S2C_ForkState`. Both options
+   * point at `POST_HOARD_LEVEL_ID` (no real level pool / C-10 vote yet);
+   * tallies stay at zero since votes aren't collected until C-10 lands.
+   */
+  private enterFork(): void {
+    this.sim.enterFork();
+    this.broadcastPhaseChange("fork");
+    const options: ForkOption[] = [
+      { optionId: "A", levelId: POST_HOARD_LEVEL_ID, biome: "dungeon", displayName: "Path A" },
+      { optionId: "B", levelId: POST_HOARD_LEVEL_ID, biome: "dungeon", displayName: "Path B" },
+    ];
+    const forkState: S2C_ForkState = {
+      type: "fork_state",
+      options,
+      tallies: { A: 0, B: 0 },
+      endsAtTick: this.sim.tick + this.sim.config.forkDurationTicks,
+    };
+    this.broadcast("fork_state", forkState);
+  }
+
+  private broadcastPhaseChange(phase: S2C_PhaseChange["phase"]): void {
+    const msg: S2C_PhaseChange = { type: "phase_change", phase };
+    this.broadcast("phase_change", msg);
+    this.broadcast("snapshot", { type: "snapshot", snapshot: this.sim.buildSnapshot() });
+    this.broadcastSeatUpdate();
   }
 
   private broadcastEvents(events: GameEvent[]): void {

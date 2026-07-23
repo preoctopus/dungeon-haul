@@ -37,3 +37,11 @@ export const INSTRUCTIONS_LEVEL_ID = "box_level";
 
 /** P4 Hoard level, loaded when the instructions phase completes. */
 export const HOARD_LEVEL_ID = "hoard_01";
+
+/**
+ * P4 post-hoard/post-fork level (C06-T24/T25). Reuses the box net-test level
+ * as a placeholder: `content/level-pool.json`'s `playablePool` is empty and
+ * C-10 (fork-vote) hasn't landed, so every fork stub-resolves to this one
+ * level rather than a real path choice.
+ */
+export const POST_HOARD_LEVEL_ID = "box_level";
