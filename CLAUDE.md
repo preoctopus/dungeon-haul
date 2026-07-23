@@ -18,6 +18,36 @@ Prior non-binding AI build plan (Phaser + FastAPI):
 
 ---
 
+## Source of truth: wiki first, then docs/
+
+Since the completion of **P4**, project documentation is migrating to the
+**omoai wiki** (MediaWiki at **https://wiki.omoai.net**), under the
+`Dungeon Haul:` page-title prefix (e.g. `Dungeon Haul:Implementation Plan`,
+`Dungeon Haul:Design/LEVEL-LOADER`, `Dungeon Haul:Components/Simulation`).
+**Check the wiki first.** Fall back to this repo's `docs/` folder only for
+material not yet migrated. If a `docs/` file and its wiki counterpart
+disagree, the wiki wins — treat `docs/` as stale.
+
+This wiki has **Semantic MediaWiki (SMW)** installed (`Property:`,
+`Concept:`, `smw/schema:` namespaces exist), so pages carry semantic
+properties/categories, not just freetext — query it like a small knowledge
+graph. Use the `mediawiki-mcp-server` MCP tools (default wiki key
+`wiki.omoai.net`) rather than guessing:
+
+- `search-page` / `search-page-by-prefix` — find pages, e.g. everything
+  under the `Dungeon Haul:` prefix.
+- `get-page` / `get-pages` — fetch a page's wikitext by title (batch up to 50).
+- `get-category-members` — enumerate a category (design docs, components…).
+- `parse-wikitext`, `get-links-here`, `get-page-history`, `compare-pages` —
+  render, trace, and diff pages.
+
+This supersedes the older "`llm-wiki/` is a synthesized overview, `docs/`
+still wins" guidance further below — for anything actually migrated to
+`wiki.omoai.net`, the wiki is now primary, `docs/` is the fallback, and
+`llm-wiki/` is a stale local artifact predating the migration.
+
+---
+
 ## Current phase — read this first
 
 **P0–P3 are done. Next work is P4 (full game flow shell).**

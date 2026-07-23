@@ -4,6 +4,7 @@ Catalog of compiled pages for **Dungeon Haul**.
 
 ## 🏗️ Architecture & Tech
 - [[architecture/SYSTEM]] - System Architecture, Tech Stack, and Networking Model.
+- [[architecture/CODE_STRUCTURE]] - Codebase Layout, Monorepo Organization, and Dependency Flow.
 - [[network/PROTOCOL]] - Wire Format, Message Definitions, and Handshake flow.
 
 ## 🎮 Gameplay & Logic
