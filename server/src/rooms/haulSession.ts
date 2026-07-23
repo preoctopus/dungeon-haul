@@ -17,13 +17,14 @@ import {
   protocolVersion,
   type GameEvent,
   type S2C_Error,
+  type S2C_PhaseChange,
   type S2C_Pong,
   type S2C_SeatUpdate,
   type S2C_Snapshot,
   type S2C_Welcome,
   type SeatId,
 } from "@dhaul/protocol";
-import { getLevel, P2_LEVEL_ID } from "../content.js";
+import { getLevel, HOARD_LEVEL_ID, INSTRUCTIONS_LEVEL_ID } from "../content.js";
 import type { LobbyService } from "../lobby/service.js";
 import { DEFAULT_SIM_CONFIG } from "../sim/config.js";
 import { Simulation } from "../sim/simulation.js";
@@ -63,7 +64,11 @@ export class HaulSession extends Room {
   override onCreate(): void {
     this.maxClients = 4;
     this.autoDispose = false; // lobby owns lifecycle (created before first WS join)
-    this.sim = new Simulation(getLevel(P2_LEVEL_ID), DEFAULT_SIM_CONFIG);
+    this.sim = new Simulation(
+      getLevel(INSTRUCTIONS_LEVEL_ID),
+      DEFAULT_SIM_CONFIG,
+      "instructions",
+    );
     this.startedAtMs = Date.now();
 
     this.onMessage("input", (client, payload: unknown) => this.handleInput(client, payload));
@@ -139,7 +144,7 @@ export class HaulSession extends Room {
       rngSeed: this.sim.config.rngSeed,
       rulesetVersion: this.sim.config.rulesetVersion,
       tickRate: 30,
-      phase: "level",
+      phase: this.sim.phase,
       snapshot: this.sim.buildSnapshot(),
     };
     client.send("welcome", welcome);
@@ -200,6 +205,15 @@ export class HaulSession extends Room {
       this.broadcastEvents(events);
       this.broadcastSeatUpdate();
     }
+
+    if (this.sim.phase === "instructions" && this.sim.isLevelComplete()) {
+      this.sim.loadLevel(getLevel(HOARD_LEVEL_ID), "level");
+      const phaseChange: S2C_PhaseChange = { type: "phase_change", phase: "level" };
+      this.broadcast("phase_change", phaseChange);
+      this.broadcast("snapshot", { type: "snapshot", snapshot: this.sim.buildSnapshot() });
+      this.broadcastSeatUpdate();
+    }
+
     // Tick lag metric (Implementation Plan P2 exit criterion).
     if (snapshot.tick % TICK_LAG_LOG_EVERY === 0) {
       const expectedMs = this.startedAtMs + snapshot.tick * TICK_MS;

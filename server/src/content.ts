@@ -27,3 +27,13 @@ export function getLevel(levelId: string): LevelDefinition {
 
 /** P2 room level: the empty box net-test level. */
 export const P2_LEVEL_ID = "box_level";
+
+/**
+ * P4 instructions-phase placeholder level (C06-T22). Reuses the box net-test
+ * level rather than introducing new content ahead of scope; humans practice
+ * movement here before AI fill begins at Hoard.
+ */
+export const INSTRUCTIONS_LEVEL_ID = "box_level";
+
+/** P4 Hoard level, loaded when the instructions phase completes. */
+export const HOARD_LEVEL_ID = "hoard_01";

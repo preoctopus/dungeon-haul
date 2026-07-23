@@ -19,6 +19,7 @@ import type {
   InputCommand,
   SeatId,
   SeatPublic,
+  SessionPhase,
   WorldSnapshot,
 } from "@dhaul/protocol";
 import { computeEncumbrance, type PlayerStats } from "@dhaul/rules";
@@ -93,19 +94,25 @@ export interface TickResult {
 
 export class Simulation {
   readonly config: SimConfig;
-  readonly level: LevelDefinition;
-  private readonly grid: SolidGrid;
+  level: LevelDefinition;
+  private grid: SolidGrid;
   private readonly seats: SeatRuntime[];
-  private readonly treasures: TreasureSystem;
-  private readonly hazards: Hazards;
-  private readonly rng: Mulberry32;
-  private readonly exitAABB: AABB;
+  private treasures: TreasureSystem;
+  private hazards: Hazards;
+  private rng: Mulberry32;
+  private exitAABB: AABB;
   private tickCount = 0;
   private exitCounter = 0;
   private levelComplete = false;
+  private phaseValue: SessionPhase;
 
-  constructor(level: LevelDefinition, config: SimConfig = DEFAULT_SIM_CONFIG) {
+  constructor(
+    level: LevelDefinition,
+    config: SimConfig = DEFAULT_SIM_CONFIG,
+    initialPhase: SessionPhase = "level",
+  ) {
     this.config = config;
+    this.phaseValue = initialPhase;
     this.level = level;
     this.grid = solidGridFromLevel(level);
     this.exitAABB = { ...level.exit };
@@ -157,6 +164,49 @@ export class Simulation {
 
   get tick(): number {
     return this.tickCount;
+  }
+
+  get phase(): SessionPhase {
+    return this.phaseValue;
+  }
+
+  /**
+   * Load a new level in place, preserving seat inventories/stats/control
+   * (DESIGN §9.1). Resets per-level transient state (stun, exit, held input).
+   */
+  loadLevel(level: LevelDefinition, phase: SessionPhase): void {
+    this.level = level;
+    this.grid = solidGridFromLevel(level);
+    this.exitAABB = { ...level.exit };
+    this.rng = new Mulberry32(deriveSeed(this.config.rngSeed, level.id));
+
+    const tPhys: TreasurePhysicsConfig = {
+      gravity: this.config.kinematics.gravity,
+      maxFallSpeed: this.config.kinematics.maxFallSpeed,
+      dt: this.config.kinematics.dt,
+      drag: 0.92,
+    };
+    this.treasures = new TreasureSystem(tPhys);
+    this.treasures.spawnFromLevel(level, this.rng, level.id);
+    this.hazards = new Hazards(level, this.config.hazards);
+
+    for (const seat of this.seats) {
+      const spawn = spawnWorldPos(level, seat.seatId);
+      seat.body = createBody(spawn.x, spawn.y);
+      seat.held = { ...NEUTRAL_INPUT };
+      seat.heldAction = false;
+      seat.heldActionPrev = false;
+      seat.heldAxisY = 0;
+      seat.stunnedUntilTick = 0;
+      seat.pickupLockoutUntilTick = 0;
+      seat.exited = false;
+      seat.exitOrder = 0;
+      seat.aiStuckTicks = 0;
+    }
+
+    this.exitCounter = 0;
+    this.levelComplete = false;
+    this.phaseValue = phase;
   }
 
   /**
@@ -272,9 +322,9 @@ export class Simulation {
     }
 
     // --- Step 1b: AI decide for remaining AI seats (C-08; human-first order) ---
-    // Phase gating: AI active on level/fork (hoard is phase=level). P4 will
-    // suppress AI on instructions; we only run level content in P3.
-    if (cfg.enableAi) {
+    // Phase gating (simulation DESIGN §6.3): AI absent during instructions —
+    // active from Hoard onward.
+    if (cfg.enableAi && this.phaseValue !== "instructions") {
       const aiView = this.buildAiWorldView();
       for (const seat of this.seats) {
         if (seat.control !== "ai") continue;
@@ -459,7 +509,12 @@ export class Simulation {
 
     // --- Step 5: Level complete? ---
     if (!this.levelComplete) {
-      const allExited = this.seats.every((s) => s.exited);
+      // Instructions phase (C06-T22): only active humans need to exit — AI
+      // is absent and unbound seats should not block the transition.
+      const allExited =
+        this.phaseValue === "instructions"
+          ? this.seats.every((s) => s.humanId === undefined || s.exited)
+          : this.seats.every((s) => s.exited);
       if (allExited) {
         this.levelComplete = true;
         // Last exit order = highest exitOrder among seats that left.
@@ -529,7 +584,7 @@ export class Simulation {
     const exit = this.exitAABB;
     return {
       tick: this.tickCount,
-      phase: "level",
+      phase: this.phaseValue,
       levelId: this.level.id,
       blockSizePx: this.level.blockSizePx,
       haulers: this.seats.map((seat) => ({
@@ -791,7 +846,7 @@ export class Simulation {
     });
     return {
       tick: this.tickCount,
-      phase: "level",
+      phase: this.phaseValue,
       levelId: this.level.id,
       levelsCompleted: 0,
       levelsAfterHoard: this.config.levelsAfterHoard,
