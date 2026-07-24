@@ -1,9 +1,9 @@
 import Phaser from "phaser";
+import { getShellNavigator } from "../shell/registry.js";
 
 /**
- * Boot + minimal asset preload for the P3 dev client.
- * Loads treasure atlas (game assets) so GameScene can draw free/carried loot.
- * Full C-01 scene flow lands later.
+ * Boot + minimal asset preload. Loads treasure atlas (game assets) so
+ * GameScene can draw free/carried loot, then hands off to Title (C01-T03).
  */
 export class BootScene extends Phaser.Scene {
   constructor() {
@@ -25,5 +25,6 @@ export class BootScene extends Phaser.Scene {
 
   create(): void {
     this.cameras.main.setBackgroundColor("#1a1626");
+    getShellNavigator(this).goTitle();
   }
 }

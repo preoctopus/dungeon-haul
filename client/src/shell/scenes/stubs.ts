@@ -2,16 +2,11 @@ import Phaser from "phaser";
 
 /**
  * Empty scene stubs for the C-01 scene registry (docs/components/client-shell/DESIGN.md §4.2).
- * Content lands with their own tasks (C01-T03 Title, T05 Credits, T06 HighScores,
- * T08 Lobby, T10 phase-bound hosts, T11 overlays). Registering them here now
- * lets the phase binder / navigator target these keys without runtime crashes.
+ * Content lands with their own tasks (T05 Credits, T06 HighScores, T08 Lobby,
+ * T10 phase-bound hosts, T11 overlays). Registering them here now lets the
+ * phase binder / navigator target these keys without runtime crashes.
+ * Title has its own implementation — see ./TitleScene.ts (C01-T03).
  */
-
-export class TitleScene extends Phaser.Scene {
-  constructor() {
-    super("Title");
-  }
-}
 
 export class CreditsScene extends Phaser.Scene {
   constructor() {
@@ -68,7 +63,6 @@ export class ErrorOverlayScene extends Phaser.Scene {
 }
 
 export const STUB_SCENES = [
-  TitleScene,
   CreditsScene,
   HighScoresScene,
   LobbyScene,
