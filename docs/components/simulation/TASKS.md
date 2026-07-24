@@ -269,13 +269,13 @@ Parallel: T07/T08 with T05 after T04; T16 with T17 after T10.
 | C06-T17 | Trap MVP | P3 | done |
 | C06-T18 | Switches | P3 | done |
 | C06-T19 | Level exit & stats | P3 | done |
-| C06-T20 | PlayerStats wiring | P3 | done (session counters; end score P4) |
+| C06-T20 | PlayerStats wiring | P3 | done (session counters; end score wiring done C06-T26) |
 | C06-T21 | Mid-join spawn | P3 | partial (soft-takeover preserve) |
 | C06-T22 | Instructions phase | P4 | pending |
 | C06-T23 | Hoard → Fork | P4 | pending |
 | C06-T24 | Fork / End branch | P4 | pending |
 | C06-T25 | Load fork winner level | P4 | pending |
-| C06-T26 | End scoring | P4 | pending |
+| C06-T26 | End scoring | P4 | done |
 | C06-T27 | End input routing | P4 | pending |
 | C06-T28 | Reconnect continuity | P5 | partial (P2 room grace) |
 | C06-T29 | Tick budget metrics | P5 | partial (lag log) |
