@@ -21,6 +21,7 @@ import {
   type S2C_ForkState,
   type S2C_PhaseChange,
   type S2C_Pong,
+  type S2C_ScoreReport,
   type S2C_SeatUpdate,
   type S2C_Snapshot,
   type S2C_Welcome,
@@ -33,6 +34,7 @@ import {
   POST_HOARD_LEVEL_ID,
 } from "../content.js";
 import type { LobbyService } from "../lobby/service.js";
+import { issueToken } from "../session/tokens.js";
 import { DEFAULT_SIM_CONFIG } from "../sim/config.js";
 import { Simulation } from "../sim/simulation.js";
 
@@ -218,11 +220,11 @@ export class HaulSession extends Room {
       this.broadcastPhaseChange("level");
     } else if (this.sim.phase === "level" && this.sim.isLevelComplete()) {
       // Hoard always forks; post-hoard levels fork until levelsAfterHoard,
-      // then end (C06-T24). End scoring itself is C06-T26, not yet wired.
+      // then end (C06-T24/T26).
       if (this.sim.isHoard || this.sim.levelsCompleted < this.sim.config.levelsAfterHoard) {
         this.enterFork();
       } else {
-        this.broadcastPhaseChange("end_count");
+        this.enterEnd();
       }
     } else if (this.sim.phase === "fork" && this.sim.isForkResolved()) {
       this.sim.loadLevel(getLevel(POST_HOARD_LEVEL_ID), "level");
@@ -258,6 +260,20 @@ export class HaulSession extends Room {
       endsAtTick: this.sim.tick + this.sim.config.forkDurationTicks,
     };
     this.broadcast("fork_state", forkState);
+  }
+
+  /**
+   * Enter the end phase and broadcast the authoritative ScoreReport
+   * (DESIGN §10.4, C06-T26). `Simulation.buildEndScoreReport` caches its
+   * result, so a second call here (there isn't one on this path, but the
+   * accept criteria require it) never re-runs the rules engine.
+   */
+  private enterEnd(): void {
+    const completionToken = issueToken();
+    const report = this.sim.buildEndScoreReport(this.sessionId, completionToken);
+    this.broadcastPhaseChange("end_count");
+    const msg: S2C_ScoreReport = { type: "score_report", report };
+    this.broadcast("score_report", msg);
   }
 
   private broadcastPhaseChange(phase: S2C_PhaseChange["phase"]): void {

@@ -17,12 +17,18 @@ import type {
   GameEvent,
   HaulerPublic,
   InputCommand,
+  ScoreReport,
   SeatId,
   SeatPublic,
   SessionPhase,
   WorldSnapshot,
 } from "@dhaul/protocol";
-import { computeEncumbrance, type PlayerStats } from "@dhaul/rules";
+import {
+  buildScoreReport,
+  computeEncumbrance,
+  type PlayerStats,
+  type ScoreSeat,
+} from "@dhaul/rules";
 import type { SimConfig } from "./config.js";
 import { DEFAULT_SIM_CONFIG } from "./config.js";
 import { footCell, solidGridFromLevel, spawnWorldPos } from "./grid.js";
@@ -109,6 +115,8 @@ export class Simulation {
   private isHoardLevel = false;
   private levelsCompletedCount = 0;
   private forkEndsAtTick = 0;
+  /** Cached once end scoring runs (C06-T26); re-entry must not re-score. */
+  private endScoreReportCache?: ScoreReport;
 
   constructor(
     level: LevelDefinition,
@@ -948,6 +956,45 @@ export class Simulation {
   /** Treasure conservation ledger for invariant tests. */
   treasureLedger() {
     return this.treasures.ledger();
+  }
+
+  /**
+   * End scoring handoff (DESIGN §10.4, C06-T26): build ScoreContext from seat
+   * runtime state, call the pure rules engine, and cache the result so a
+   * second call (e.g. on phase re-entry) never re-runs computeTakes.
+   */
+  buildEndScoreReport(sessionId: string, completionToken: string): ScoreReport {
+    if (this.endScoreReportCache) return this.endScoreReportCache;
+
+    const scoreSeats: ScoreSeat[] = this.seats.map((seat) => ({
+      seatId: seat.seatId,
+      character: seat.character,
+      human: seat.control === "human",
+      stats: seat.stats,
+      finalInventory: seat.carryStack.map((t) => ({
+        instanceId: t.instanceId,
+        defId: t.defId,
+        valueOverrideGp: t.valueGp,
+      })),
+      hoardExitInventoryCount: seat.stats.hoardExitItemCount,
+    }));
+
+    const rulesReport = buildScoreReport({
+      sessionId,
+      seats: scoreSeats,
+      levelsCompleted: this.levelsCompletedCount,
+      completionToken,
+    });
+
+    const report: ScoreReport = {
+      rulesetVersion: rulesReport.rulesetVersion,
+      sessionId: rulesReport.sessionId,
+      totalTreasureGp: rulesReport.totalTreasureGp,
+      players: rulesReport.players,
+      completionToken: rulesReport.completionToken,
+    };
+    this.endScoreReportCache = report;
+    return report;
   }
 
   /** Whether all haulers have exited the level. */
