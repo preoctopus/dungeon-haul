@@ -11,13 +11,7 @@ import {
   makeWorldSnapshot,
   testRng,
 } from "./helpers.js";
-import type {
-  CharacterId,
-  HaulerPublic,
-  SessionPhase,
-  TreasurePublic,
-  WorldSnapshot,
-} from "@dhaul/protocol";
+
 
 describe("makeWorldSnapshot()", () => {
   it("returns a valid WorldSnapshot with sensible defaults", () => {
@@ -35,22 +29,22 @@ describe("makeWorldSnapshot()", () => {
   });
 
   it("merges overrides on top of defaults", () => {
-    const snap = makeWorldSnapshot({ tick: 42, phase: "fork" as SessionPhase });
+    const snap = makeWorldSnapshot({ tick: 42, phase: "fork" });
     expect(snap.tick).toBe(42);
     expect(snap.phase).toBe("fork");
   });
 
   it("accepts a fully-populated snapshot", () => {
     const snap = makeWorldSnapshot({
-      haulers: [{ seatId: 0, character: "gnome" as CharacterId, control: "human", x: 100, y: 200, vx: 0, vy: -50, facing: 1, anim: "idle", carry: [], stunned: false }] as HaulerPublic[],
-      treasures: [{ instanceId: "t1", defId: "gold_ring", x: 50, y: 60 } as TreasurePublic],
+      haulers: [{ seatId: 0, character: "gnome" as const, control: "human" as const, x: 100, y: 200, vx: 0, vy: -50, facing: 1, anim: "idle" as const, carry: [], stunned: false }],
+      treasures: [{ instanceId: "t1", defId: "gold_ring", x: 50, y: 60 }],
     });
     expect(snap.haulers).toHaveLength(1);
     expect(snap.treasures).toHaveLength(1);
   });
 
   it("produces a snapshot that can be JSON-stringified without error", () => {
-    const snap = makeWorldSnapshot({ tick: 7, phase: "end_count" as SessionPhase });
+    const snap = makeWorldSnapshot({ tick: 7, phase: "end_count" });
     // JSON.stringify should not throw — proves no circular refs or undefined.
     expect(() => JSON.stringify(snap)).not.toThrow();
   });

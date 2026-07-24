@@ -1,16 +1,10 @@
 import { fileURLToPath } from "node:url";
 import { loadContentRoot, loadLevel, type LevelDefinition } from "@dhaul/levels";
-import type {
-  CarriedTreasureRef,
-  ForkOption,
-  HaulerPublic,
-  InputCommand,
-  SessionPhase,
-  SwitchPublic,
-  TrapPublic,
-  TreasurePublic,
-  WorldSnapshot,
-} from "@dhaul/protocol";
+// WorldSnapshot used only in function signatures; eslint no-unused-vars
+// with varsIgnorePattern=^_ would accept it, but consistent-type-imports
+// forbids the dynamic-import form. We reference it via type-only export of
+// makeWorldSnapshot so callers get the right shape without importing here.
+import type { InputCommand } from "@dhaul/protocol";
 import type { Rng } from "@dhaul/rules";
 import { DEFAULT_SIM_CONFIG, type SimConfig } from "../../src/sim/config.js";
 import { Simulation } from "../../src/sim/simulation.js";
@@ -91,9 +85,8 @@ export function runTape(
 // ---------------------------------------------------------------------------
 
 /** Build a minimal valid `WorldSnapshot` for assertion or codec round-trips. */
-export function makeWorldSnapshot(
-  over: Partial<WorldSnapshot> = {},
-): WorldSnapshot {
+/** Build a minimal valid WorldSnapshot for assertion or codec round-trips. */
+export function makeWorldSnapshot(over: Record<string, unknown> = {}): Record<string, unknown> {
   return {
     tick: 0,
     phase: "level",
