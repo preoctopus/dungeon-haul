@@ -123,59 +123,59 @@ describe("ScoreReport contract (protocol score.ts)", () => {
   });
 });
 
-function parseEncoded<T>(json: string): T { return JSON.parse(json) as T; }
+type JsonValue = Record<string, unknown>;
 
 describe("encodeMessage round-trip", () => {
   it("encodes and decodes a snapshot message", () => {
     const msg = encodeMessage({ type: "snapshot", tick: 5, phase: "level" as const, levelsCompleted: 1, levelsAfterHoard: 2, lastProcessedInputSeq: [0,0,0,0], haulers: [], treasures: [], traps: [], switches: [] });
-    const parsed = parseEncoded<any>(msg);
+    const parsed = JSON.parse(msg) as JsonValue;
     expect(parsed.type).toBe("snapshot");
     expect(parsed.tick).toBe(5);
   });
   it("encodes and decodes an error message", () => {
     const msg = encodeMessage({ type: "error", code: "JOIN_FAILED", detail: "session full" });
-    const parsed = parseEncoded<any>(msg);
+    const parsed = JSON.parse(msg) as JsonValue;
     expect(parsed.type).toBe("error");
     expect(parsed.code).toBe("JOIN_FAILED");
   });
   it("encodes and decodes a shares message", () => {
     const msg = encodeMessage({ type: "shares", sessionId: "sess-shares", perSeat: [{ seatId: 0, gp: 10, shares: 2, rank: 1 }] });
-    const parsed = parseEncoded<any>(msg);
+    const parsed = JSON.parse(msg) as JsonValue;
     expect(parsed.type).toBe("shares");
     expect(parsed.sessionId).toBe("sess-shares");
   });
   it("encodes and decodes an end_entry message", () => {
     const msg = encodeMessage({ type: "end_entry", eligibleForHighScore: true });
-    const parsed = parseEncoded<any>(msg);
+    const parsed = JSON.parse(msg) as JsonValue;
     expect(parsed.type).toBe("end_entry");
     expect(parsed.eligibleForHighScore).toBe(true);
   });
   it("encodes and decodes a name_entry message", () => {
     const msg = encodeMessage({ type: "name_entry", name: "Player1" });
-    const parsed = parseEncoded<any>(msg);
+    const parsed = JSON.parse(msg) as JsonValue;
     expect(parsed.type).toBe("name_entry");
     expect(parsed.name).toBe("Player1");
   });
   it("encodes and decodes a welcome message", () => {
     const msg = encodeMessage({ type: "welcome", sessionId: "s1", seatId: 0, seatToken: "t1" });
-    const parsed = parseEncoded<any>(msg);
+    const parsed = JSON.parse(msg) as JsonValue;
     expect(parsed.type).toBe("welcome");
     expect(parsed.seatId).toBe(0);
   });
   it("encodes and decodes a high_scores message", () => {
     const msg = encodeMessage({ type: "high_scores", entries: [{ name: "Alice", gp: 100 }] });
-    const parsed = parseEncoded<any>(msg);
+    const parsed = JSON.parse(msg) as JsonValue;
     expect(parsed.type).toBe("high_scores");
     expect(parsed.entries[0].name).toBe("Alice");
   });
   it("encodes and decodes a fork message", () => {
     const msg = encodeMessage({ type: "fork", choices: [{ label: "Forest", levelId: "forest_01" }] });
-    const parsed = parseEncoded<any>(msg);
+    const parsed = JSON.parse(msg) as JsonValue;
     expect(parsed.type).toBe("fork");
   });
   it("encodes and decodes an end_shares message with perSeat data", () => {
     const msg = encodeMessage({ type: "end_shares", sessionId: "sess-end", perSeat: [{ seatId: 0, gp: 20, shares: 4, rank: 1 }, { seatId: 1, gp: 15, shares: 3, rank: 2 }] });
-    const parsed = parseEncoded<any>(msg);
+    const parsed = JSON.parse(msg) as JsonValue;
     expect(parsed.type).toBe("end_shares");
     expect(parsed.perSeat.length).toBe(2);
   });
