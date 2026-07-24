@@ -83,7 +83,6 @@ export class BootScene extends Phaser.Scene {
     }
 
     const progress = this.add.text(10, 10, `Loading ${manifest.atlases.length + manifest.images.length} assets…`, { fontSize: "14px" });
-    let loaded = 0;
     this.load.on("progress", (value: number) => {
       // value is a running fraction of the total bytes queued in THIS scene's loader.
       progress.setText(`Loading assets… ${(Math.round(value * 100))}%`);

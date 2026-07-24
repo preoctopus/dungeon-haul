@@ -1,9 +1,10 @@
 import Phaser from "phaser";
+import { LOGICAL_HEIGHT, LOGICAL_WIDTH } from "./shell/config.js";
 import { ManifestLoader, BootScene } from "./scenes/BootScene";
 import { mountDevLobby } from "./devLobby";
-import { createGame } from "./shell/bootstrap.js";
 
-const game = createGame({
+const game = new Phaser.Game({
+  type: Phaser.AUTO,
   parent: "game",
   width: LOGICAL_WIDTH,
   height: LOGICAL_HEIGHT,
