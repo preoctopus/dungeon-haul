@@ -276,7 +276,7 @@ Parallel: T07/T08 with T05 after T04; T16 with T17 after T10.
 | C06-T24 | Fork / End branch | P4 | done |
 | C06-T25 | Load fork winner level | P4 | done (real C-10 `ForkVoteModule`, not stub timer) |
 | C06-T26 | End scoring | P4 | done |
-| C06-T27 | End input routing | P4 | pending |
+| C06-T27 | End input routing | P4 | done |
 | C06-T28 | Reconnect continuity | P5 | partial (P2 room grace) |
 | C06-T29 | Tick budget metrics | P5 | partial (lag log) |
 | C06-T30 | Golden input tapes | P5 | pending |

@@ -21,7 +21,9 @@
 
 import type { InputCommand } from "./input.js";
 import type {
+  C2S_EndSkip,
   C2S_Input,
+  C2S_NameEntry,
   C2SMessage,
   ErrorCode,
   S2CMessage,
@@ -99,6 +101,30 @@ export function isC2SInput(value: unknown): value is C2S_Input {
     msg["seatId"] >= 0 &&
     msg["seatId"] <= 3 &&
     isInputCommand(msg["command"])
+  );
+}
+
+/** Full structural validation of a `C2S_EndSkip` message. */
+export function isC2SEndSkip(value: unknown): value is C2S_EndSkip {
+  if (typeof value !== "object" || value === null) return false;
+  return (value as Record<string, unknown>)["type"] === "end_skip";
+}
+
+/** High-score name entry: 1-12 chars, allowlist charset (lobby-and-scores.md). */
+const NAME_ENTRY_MAX = 12;
+const NAME_ENTRY_ALLOWED = /^[A-Za-z0-9 _.'-]+$/;
+
+/** Full structural validation of a `C2S_NameEntry` message. */
+export function isC2SNameEntry(value: unknown): value is C2S_NameEntry {
+  if (typeof value !== "object" || value === null) return false;
+  const msg = value as Record<string, unknown>;
+  if (msg["type"] !== "name_entry") return false;
+  const name = msg["name"];
+  return (
+    typeof name === "string" &&
+    name.length >= 1 &&
+    name.length <= NAME_ENTRY_MAX &&
+    NAME_ENTRY_ALLOWED.test(name)
   );
 }
 

@@ -12,7 +12,9 @@
 import { CloseCode, Room, ServerError, type Client } from "@colyseus/core";
 import {
   COLYSEUS_ERROR_CODES,
+  isC2SEndSkip,
   isC2SInput,
+  isC2SNameEntry,
   isJoinOptions,
   protocolVersion,
   type GameEvent,
@@ -92,6 +94,10 @@ export class HaulSession extends Room {
     this.onMessage("leave", (client) => {
       client.leave(CloseCode.CONSENTED);
     });
+    this.onMessage("end_skip", (client, payload: unknown) => this.handleEndSkip(client, payload));
+    this.onMessage("name_entry", (client, payload: unknown) =>
+      this.handleNameEntry(client, payload),
+    );
     // Forward-compatibility: ignore unknown channels silently.
     this.onMessage("*", () => undefined);
 
@@ -204,6 +210,22 @@ export class HaulSession extends Room {
     m.tokens -= 1;
 
     this.sim.applyInput(m.seatId, payload.command);
+  }
+
+  private handleEndSkip(client: Client, payload: unknown): void {
+    const m = this.meta.get(client.sessionId);
+    if (!m) return;
+    if (!isC2SEndSkip(payload)) return; // drop malformed silently (untrusted)
+    if (this.sim.skipEnd()) {
+      this.broadcastPhaseChange(this.sim.phase);
+    }
+  }
+
+  private handleNameEntry(client: Client, payload: unknown): void {
+    const m = this.meta.get(client.sessionId);
+    if (!m) return;
+    if (!isC2SNameEntry(payload)) return; // drop malformed silently (untrusted)
+    this.sim.recordEndName(m.seatId, payload.name);
   }
 
   private tick(): void {

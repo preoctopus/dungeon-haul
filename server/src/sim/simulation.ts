@@ -121,6 +121,8 @@ export class Simulation {
   private readonly playedLevelIds = new Set<string>();
   /** Cached once end scoring runs (C06-T26); re-entry must not re-score. */
   private endScoreReportCache?: ScoreReport;
+  /** High-score name entries submitted via C2S_NameEntry (C06-T27). */
+  private readonly endNames = new Map<SeatId, string>();
 
   constructor(
     level: LevelDefinition,
@@ -286,6 +288,8 @@ export class Simulation {
    * Returns false if the command was ignored.
    */
   applyInput(seatId: SeatId, cmd: InputCommand): boolean {
+    // No free-run in end sub-phases (C06-T27): only C2S_EndSkip/NameEntry apply.
+    if (this.phaseValue.startsWith("end_")) return false;
     const seat = this.seats[seatId];
     if (!seat) return false;
     if (cmd.seq <= seat.lastQueuedSeq) return false; // dup / stale
@@ -1060,6 +1064,55 @@ export class Simulation {
     };
     this.endScoreReportCache = report;
     return report;
+  }
+
+  /**
+   * Advance the end sub-phase machine on `C2S_EndSkip` (DESIGN §10.2/§10.4,
+   * C06-T27): end_count -> end_shares -> end_spoils -> (end_entry if any
+   * seat qualifies for a high score, else closed) -> closed. Returns false
+   * if not currently in an end sub-phase (nothing to advance).
+   */
+  skipEnd(): boolean {
+    switch (this.phaseValue) {
+      case "end_count":
+        this.phaseValue = "end_shares";
+        return true;
+      case "end_shares":
+        this.phaseValue = "end_spoils";
+        return true;
+      case "end_spoils":
+        this.phaseValue = this.hasEligibleHighScorePlayer() ? "end_entry" : "closed";
+        return true;
+      case "end_entry":
+        this.phaseValue = "closed";
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  private hasEligibleHighScorePlayer(): boolean {
+    return this.endScoreReportCache?.players.some((p) => p.eligibleForHighScore) ?? false;
+  }
+
+  /**
+   * Record a high-score name entry (C06-T27): only in `end_entry`, only for
+   * a human, eligible (per the cached ScoreReport), single-submit seat.
+   */
+  recordEndName(seatId: SeatId, name: string): boolean {
+    if (this.phaseValue !== "end_entry") return false;
+    const seat = this.seats[seatId];
+    if (!seat || seat.control !== "human") return false;
+    if (this.endNames.has(seatId)) return false;
+    const player = this.endScoreReportCache?.players.find((p) => p.seatId === seatId);
+    if (!player?.eligibleForHighScore) return false;
+    this.endNames.set(seatId, name);
+    return true;
+  }
+
+  /** Submitted high-score name for a seat, if any (C06-T27). */
+  getEndName(seatId: SeatId): string | undefined {
+    return this.endNames.get(seatId);
   }
 
   /** Whether all haulers have exited the level. */
