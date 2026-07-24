@@ -31,6 +31,8 @@ import {
 } from "@dhaul/rules";
 import type { SimConfig } from "./config.js";
 import { DEFAULT_SIM_CONFIG } from "./config.js";
+import type { ForkLevelMeta, ForkPublicState, ForkResult } from "./fork.js";
+import { ForkVoteModule } from "./fork.js";
 import { footCell, solidGridFromLevel, spawnWorldPos } from "./grid.js";
 import { Hazards } from "./hazards.js";
 import {
@@ -114,7 +116,9 @@ export class Simulation {
   /** Hoard does not count toward `levelsAfterHoard` (DESIGN §9.3). */
   private isHoardLevel = false;
   private levelsCompletedCount = 0;
-  private forkEndsAtTick = 0;
+  private readonly forkModule: ForkVoteModule;
+  /** Level ids already loaded this run (fork-vote DESIGN §5.4 unplayed pool). */
+  private readonly playedLevelIds = new Set<string>();
   /** Cached once end scoring runs (C06-T26); re-entry must not re-score. */
   private endScoreReportCache?: ScoreReport;
 
@@ -124,6 +128,7 @@ export class Simulation {
     initialPhase: SessionPhase = "level",
   ) {
     this.config = config;
+    this.forkModule = new ForkVoteModule(config.fork);
     this.phaseValue = initialPhase;
     this.level = level;
     this.grid = solidGridFromLevel(level);
@@ -193,19 +198,41 @@ export class Simulation {
   }
 
   /**
-   * Enter the fork phase: freezes physics/AI for `config.forkDurationTicks`
-   * (DESIGN §10.3). Stub auto-resolve timer — real path-vote tallying and
-   * UI is C-10 (fork-vote); the room calls `isForkResolved()` / `loadLevel()`
-   * once C-10 lands to replace this timer with an actual vote result.
+   * Enter the fork phase (DESIGN §10.3): freezes physics/AI and opens the
+   * C-10 vote — an unplayed level pair picked from `pool`, argue-pulse
+   * tallying over `config.fork.windowTicks`. `pool`/`levelMeta` come from the
+   * server content layer (`server/src/content.ts`); the pure sim never
+   * touches disk.
    */
-  enterFork(): void {
+  enterFork(
+    pool: readonly string[],
+    levelMeta: (levelId: string) => ForkLevelMeta,
+  ): ForkPublicState {
     this.phaseValue = "fork";
-    this.forkEndsAtTick = this.tickCount + this.config.forkDurationTicks;
+    return this.forkModule.open({
+      tick: this.tickCount,
+      seats: this.seats.map((s) => ({ seatId: s.seatId, control: s.control })),
+      rng: this.rng,
+      playedLevelIds: this.playedLevelIds,
+      pool,
+      levelMeta,
+      windowTicks: this.config.fork.windowTicks,
+    });
   }
 
-  /** True once the fork phase's stub hold timer has elapsed. */
+  /** True once the fork vote window has elapsed and a winner is resolved. */
   isForkResolved(): boolean {
-    return this.phaseValue === "fork" && this.tickCount >= this.forkEndsAtTick;
+    return this.phaseValue === "fork" && !this.forkModule.isActive() && this.forkModule.getResult() !== undefined;
+  }
+
+  /** Winning option/level once `isForkResolved()` is true. */
+  get forkResult(): ForkResult | undefined {
+    return this.forkModule.getResult();
+  }
+
+  /** Live public fork state (options, tallies, endsAtTick) for broadcast. */
+  getForkPublicState(): ForkPublicState {
+    return this.forkModule.getPublicState();
   }
 
   /**
@@ -218,6 +245,7 @@ export class Simulation {
     opts?: { isHoard?: boolean },
   ): void {
     this.isHoardLevel = opts?.isHoard ?? false;
+    if (phase === "level") this.playedLevelIds.add(level.id);
     this.level = level;
     this.grid = solidGridFromLevel(level);
     this.exitAABB = { ...level.exit };
@@ -311,6 +339,11 @@ export class Simulation {
   /** Advance exactly one fixed tick. Never call with wall-clock dt. */
   step(): TickResult {
     this.tickCount += 1;
+
+    // Fork vote micro-step (DESIGN §6.2): no physics, just input→tally→resolve.
+    if (this.phaseValue === "fork") {
+      return this.stepFork();
+    }
 
     // Phase-gated physics free-run (DESIGN §10.3): only instructions/level
     // simulate movement; fork and end_* freeze until the room advances phase.
@@ -594,6 +627,35 @@ export class Simulation {
       seat.heldActionPrev = seat.heldAction;
     }
 
+    return { snapshot: this.buildSnapshot(), events };
+  }
+
+  /**
+   * Fork phase active-tick order (DESIGN §6.2): apply fork-context inputs
+   * for all seats (human queue drain + AI fallback driver), then tick the
+   * vote module, which auto-resolves once the window elapses.
+   */
+  private stepFork(): TickResult {
+    for (const seat of this.seats) {
+      const cmd = seat.queue.shift();
+      if (cmd) {
+        seat.lastProcessedSeq = cmd.seq;
+        this.forkModule.applyForkInput(seat.seatId, cmd, this.tickCount);
+      }
+      if (seat.control === "ai" && this.config.enableAi) {
+        this.forkModule.driveAiSeat(seat.seatId, this.rng);
+      }
+    }
+    const { resolved } = this.forkModule.tick(this.tickCount);
+    const events: GameEvent[] = [];
+    if (resolved) {
+      events.push({
+        type: "fork_resolved",
+        optionId: resolved.winningOptionId,
+        levelId: resolved.levelId,
+        tallies: resolved.tallies,
+      });
+    }
     return { snapshot: this.buildSnapshot(), events };
   }
 

@@ -20,6 +20,15 @@
 
 Maps to Implementation Plan **P4** primarily; unit tests can land in **P1/P3** with pure module.
 
+**Implementation status (P4):** Core module done — `server/src/sim/fork.ts`
+(`ForkVoteModule`, `pickForkPair`) covers T01–T10; C-06 integration
+(`Simulation.enterFork`/`stepFork`, `HaulSession.enterFork`/`broadcastForkState`)
+covers T15–T18, T20; the fallback AI driver (T12) is implemented since C-08
+`decide()` has no fork-phase handling yet (T11 still open). Mid-join/disconnect
+continuity (T13/T14) and stretch items (T19, T21–T26) remain open. Tests:
+`server/test/sim/forkVote.test.ts` (pure module) + `server/test/sim/fork.test.ts`
+(C-06 integration).
+
 ---
 
 ## Pure module & data (can precede full sim)

@@ -1,16 +1,20 @@
 /**
  * C06-T23/T24: Hoard → Fork handoff and post-level Fork/End branch.
- * Fork itself is a stub timer (real vote tallying is C-10) but the phase
- * machine transitions and freeze-during-fork behavior are exercised here.
+ * Exercises the phase machine transitions and freeze-during-fork behavior
+ * against the real C-10 `ForkVoteModule`; vote-tallying mechanics themselves
+ * are covered by `forkVote.test.ts`.
  */
 import { beforeEach, describe, expect, it } from "vitest";
 import type { CellType, LevelDefinition } from "@dhaul/levels";
 import { DEFAULT_PARALLAX } from "@dhaul/levels";
 import { DEFAULT_SIM_CONFIG } from "../../src/sim/config.js";
+import { DEFAULT_FORK_CONFIG, type ForkLevelMeta } from "../../src/sim/fork.js";
 import { Simulation } from "../../src/sim/simulation.js";
 import { resetSeq } from "./helpers.js";
 
 beforeEach(resetSeq);
+
+const levelMeta = (): ForkLevelMeta => ({ biome: "dungeon", displayName: "Test" });
 
 /**
  * Minimal arena whose exit sits on every seat's spawn cell — outside
@@ -88,16 +92,20 @@ describe("sim C06-T23/T24: fork phase", () => {
     expect(sim.levelsCompleted).toBe(1);
   });
 
-  it("fork phase freezes physics until the stub timer elapses", () => {
+  it("fork phase freezes physics until the vote window elapses", () => {
     const level = arenaExitAtSpawn0("test_fork_freeze_arena");
     const sim = new Simulation(
       level,
-      { ...DEFAULT_SIM_CONFIG, enableAi: false, forkDurationTicks: 5 },
+      {
+        ...DEFAULT_SIM_CONFIG,
+        enableAi: false,
+        fork: { ...DEFAULT_FORK_CONFIG, windowTicks: 5 },
+      },
       "level",
     );
     sim.bindHuman(1, "h2");
     for (let i = 0; i < 10; i++) sim.step(); // let seat 1 settle to the floor
-    sim.enterFork();
+    sim.enterFork([level.id], levelMeta);
     expect(sim.phase).toBe("fork");
     const before = sim.seatState(1).body;
     for (let i = 0; i < 3; i++) {
@@ -116,15 +124,20 @@ describe("sim C06-T23/T24: fork phase", () => {
     const level = arenaExitAtSpawn0("test_fork_resolve_arena");
     const sim = new Simulation(
       level,
-      { ...DEFAULT_SIM_CONFIG, enableAi: false, forkDurationTicks: 1 },
+      {
+        ...DEFAULT_SIM_CONFIG,
+        enableAi: false,
+        fork: { ...DEFAULT_FORK_CONFIG, windowTicks: 1 },
+      },
       "level",
     );
     sim.bindHuman(0, "h1");
     sim.step();
     expect(sim.isLevelComplete()).toBe(true);
-    sim.enterFork();
+    sim.enterFork([level.id], levelMeta);
     sim.step();
     expect(sim.isForkResolved()).toBe(true);
+    expect(sim.forkResult?.levelId).toBe(level.id);
 
     sim.loadLevel(level, "level");
     expect(sim.phase).toBe("level");

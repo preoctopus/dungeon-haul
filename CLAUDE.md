@@ -122,7 +122,7 @@ When implementing code, **follow frozen docs**. Prefer ADRs for stack or multipl
 | Promo site | `website/` | Marketing pages (not the game client) |
 | Asset gallery | `asset_gallery_website/` | Local art browser — don’t break casually |
 
-**Still missing (P4+):** full Phaser scene graph, fork-vote component, end-screen director, high-score DB, audio director wiring, full C-02 character/VFX presentation.
+**Still missing (P4+):** full Phaser scene graph, Fork client UI (server-side vote module done), end-screen director, high-score DB, audio director wiring, full C-02 character/VFX presentation.
 
 ---
 
@@ -183,7 +183,7 @@ Catalog + status: [`docs/COMPONENTS.md`](docs/COMPONENTS.md).
 | C-07 | `rules-engine` | Pure treasure + shares | Done (P1) |
 | C-08 | `ai-controller` | AI inputs | Done (P3) `packages/ai` |
 | C-09 | `level-loader` | Pixel maps | Done (P1) |
-| C-10 | `fork-vote` | Path select + argue | Not started |
+| C-10 | `fork-vote` | Path select + argue | Done (P4) — `server/src/sim/fork.ts` |
 | C-11 | `end-screen` | Scoring cinematics | Not started |
 | C-12 | `high-scores` | Top 25 + New! | Not started |
 | C-13 | `audio-director` | Music/SFX | Assets exist; director not wired |

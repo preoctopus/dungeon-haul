@@ -15,7 +15,6 @@ import {
   isC2SInput,
   isJoinOptions,
   protocolVersion,
-  type ForkOption,
   type GameEvent,
   type S2C_Error,
   type S2C_ForkState,
@@ -28,10 +27,11 @@ import {
   type SeatId,
 } from "@dhaul/protocol";
 import {
+  getForkLevelMeta,
   getLevel,
+  getPlayablePool,
   HOARD_LEVEL_ID,
   INSTRUCTIONS_LEVEL_ID,
-  POST_HOARD_LEVEL_ID,
 } from "../content.js";
 import type { LobbyService } from "../lobby/service.js";
 import { issueToken } from "../session/tokens.js";
@@ -226,9 +226,14 @@ export class HaulSession extends Room {
       } else {
         this.enterEnd();
       }
-    } else if (this.sim.phase === "fork" && this.sim.isForkResolved()) {
-      this.sim.loadLevel(getLevel(POST_HOARD_LEVEL_ID), "level");
-      this.broadcastPhaseChange("level");
+    } else if (this.sim.phase === "fork") {
+      if (this.sim.isForkResolved()) {
+        const levelId = this.sim.forkResult!.levelId;
+        this.sim.loadLevel(getLevel(levelId), "level");
+        this.broadcastPhaseChange("level");
+      } else {
+        this.broadcastForkState();
+      }
     }
 
     // Tick lag metric (Implementation Plan P2 exit criterion).
@@ -242,22 +247,23 @@ export class HaulSession extends Room {
   }
 
   /**
-   * Enter the fork phase and broadcast a stub `S2C_ForkState`. Both options
-   * point at `POST_HOARD_LEVEL_ID` (no real level pool / C-10 vote yet);
-   * tallies stay at zero since votes aren't collected until C-10 lands.
+   * Enter the fork phase (C-10): pick an unplayed level pair from the
+   * content pool and open the vote, then broadcast the resulting public
+   * state. Tallies update every tick thereafter via `broadcastForkState`.
    */
   private enterFork(): void {
-    this.sim.enterFork();
+    this.sim.enterFork(getPlayablePool(), getForkLevelMeta);
     this.broadcastPhaseChange("fork");
-    const options: ForkOption[] = [
-      { optionId: "A", levelId: POST_HOARD_LEVEL_ID, biome: "dungeon", displayName: "Path A" },
-      { optionId: "B", levelId: POST_HOARD_LEVEL_ID, biome: "dungeon", displayName: "Path B" },
-    ];
+    this.broadcastForkState();
+  }
+
+  private broadcastForkState(): void {
+    const state = this.sim.getForkPublicState();
     const forkState: S2C_ForkState = {
       type: "fork_state",
-      options,
-      tallies: { A: 0, B: 0 },
-      endsAtTick: this.sim.tick + this.sim.config.forkDurationTicks,
+      options: state.options,
+      tallies: state.tallies,
+      endsAtTick: state.endsAtTick,
     };
     this.broadcast("fork_state", forkState);
   }

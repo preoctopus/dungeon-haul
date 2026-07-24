@@ -4,8 +4,10 @@ import { fileURLToPath } from "node:url";
 import {
   loadContentRoot,
   loadLevel,
+  type ContentIndex,
   type LevelDefinition,
 } from "@dhaul/levels";
+import type { ForkLevelMeta } from "./sim/fork.js";
 
 // src/content.ts and dist/content.js both sit two levels below the repo root.
 const DEFAULT_ROOT = fileURLToPath(new URL("../../content", import.meta.url));
@@ -14,15 +16,33 @@ export function contentRootDir(): string {
   return process.env["DHAUL_CONTENT_ROOT"] ?? DEFAULT_ROOT;
 }
 
+let indexCache: ContentIndex | undefined;
+
+function contentIndex(): ContentIndex {
+  if (!indexCache) indexCache = loadContentRoot(contentRootDir());
+  return indexCache;
+}
+
 const cache = new Map<string, LevelDefinition>();
 
 export function getLevel(levelId: string): LevelDefinition {
   let level = cache.get(levelId);
   if (!level) {
-    level = loadLevel(loadContentRoot(contentRootDir()), levelId);
+    level = loadLevel(contentIndex(), levelId);
     cache.set(levelId, level);
   }
   return level;
+}
+
+/** Unplayed-pair source for the fork vote (fork-vote DESIGN §5.2). */
+export function getPlayablePool(): readonly string[] {
+  return contentIndex().pool.playablePool;
+}
+
+/** `ForkVoteModule.open()`'s `levelMeta` callback (fork-vote DESIGN §14). */
+export function getForkLevelMeta(levelId: string): ForkLevelMeta {
+  const level = getLevel(levelId);
+  return { biome: level.biome, displayName: level.displayName };
 }
 
 /** P2 room level: the empty box net-test level. */
@@ -37,11 +57,3 @@ export const INSTRUCTIONS_LEVEL_ID = "box_level";
 
 /** P4 Hoard level, loaded when the instructions phase completes. */
 export const HOARD_LEVEL_ID = "hoard_01";
-
-/**
- * P4 post-hoard/post-fork level (C06-T24/T25). Reuses the box net-test level
- * as a placeholder: `content/level-pool.json`'s `playablePool` is empty and
- * C-10 (fork-vote) hasn't landed, so every fork stub-resolves to this one
- * level rather than a real path choice.
- */
-export const POST_HOARD_LEVEL_ID = "box_level";
