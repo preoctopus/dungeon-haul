@@ -560,10 +560,13 @@ export class Simulation {
     // --- Step 5: Level complete? ---
     if (!this.levelComplete) {
       // Instructions phase (C06-T22): only active humans need to exit — AI
-      // is absent and unbound seats should not block the transition.
+      // is absent and unbound seats should not block the transition. A room
+      // with nobody bound yet (fresh room, no joins) must not vacuously
+      // complete — otherwise the sim races ahead of the first client's join.
       const allExited =
         this.phaseValue === "instructions"
-          ? this.seats.every((s) => s.humanId === undefined || s.exited)
+          ? this.seats.some((s) => s.humanId !== undefined) &&
+            this.seats.every((s) => s.humanId === undefined || s.exited)
           : this.seats.every((s) => s.exited);
       if (allExited) {
         this.levelComplete = true;
