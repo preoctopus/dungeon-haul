@@ -1,14 +1,7 @@
 import { fileURLToPath } from "node:url";
 import { loadContentRoot, loadLevel, type LevelDefinition } from "@dhaul/levels";
 import type {
-  CarriedTreasureRef,
-  ForkOption,
-  HaulerPublic,
   InputCommand,
-  SessionPhase,
-  SwitchPublic,
-  TrapPublic,
-  TreasurePublic,
   WorldSnapshot,
 } from "@dhaul/protocol";
 import type { Rng } from "@dhaul/rules";
