@@ -1,22 +1,9 @@
-import Phaser from "phaser";
-import { BootScene } from "./scenes/BootScene";
 import { mountDevLobby } from "./devLobby";
+import { createGame } from "./shell/bootstrap.js";
 
-/** Frozen logical resolution: 960×540, integer-friendly FIT + letterbox. */
-export const LOGICAL_WIDTH = 960;
-export const LOGICAL_HEIGHT = 540;
-
-const game = new Phaser.Game({
-  type: Phaser.AUTO,
+const game = createGame({
   parent: "game",
-  width: LOGICAL_WIDTH,
-  height: LOGICAL_HEIGHT,
-  backgroundColor: "#1a1626",
-  scale: {
-    mode: Phaser.Scale.FIT,
-    autoCenter: Phaser.Scale.CENTER_BOTH,
-  },
-  scene: [BootScene],
+  apiBaseUrl: import.meta.env["VITE_SERVER_URL"] ?? "http://localhost:8080",
 });
 
 // P2: DOM create/join UI overlays the canvas; on connect it starts GameScene.
