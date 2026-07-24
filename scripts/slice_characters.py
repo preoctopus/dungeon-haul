@@ -1,7 +1,9 @@
 import os
 import shutil
+import numpy as np
+from collections import deque
 from PIL import Image
-from asset_processor import remove_background_chroma, create_phaser_atlas
+from asset_processor import create_phaser_atlas
 
 RAW_DIR = "art_raw/characters"
 PUBLIC_DIR = "client/public/assets/atlases"
@@ -15,70 +17,116 @@ chars = [
     ("dwarf", "docs/art/preview/dwarf_character_sheet_1784606165897.jpg")
 ]
 
-# Layout specs for 4 rows in 1024x1024 sheets
-# Row 0: Idle (4 frames) - y range ~ 80..240
-# Row 1: Run (6 frames) - y range ~ 310..470
-# Row 2: Jump (3 f) + Duck (2 f) - y range ~ 540..700
-# Row 3: Hurt (3 f) + Stunned (4 f) - y range ~ 770..930
-
+# Exact 1024x1024 sheet Y ranges & column configurations
 anim_rows = [
-    # (row_index, y_min, y_max, [(anim_name, frame_count), ...])
-    (0, 80, 240, [("idle", 4)]),
-    (1, 310, 470, [("run", 6)]),
-    (2, 540, 700, [("jump", 3), ("duck", 2)]),
-    (3, 770, 930, [("hurt", 3), ("stunned", 4)])
+    (45, 250, [("idle", 4)]),
+    (295, 500, [("run", 6)]),
+    (545, 750, [("jump", 3), ("duck", 2)]),
+    (795, 1000, [("hurt", 3), ("stunned", 4)])
 ]
+
+def remove_outer_background(crop_img):
+    """
+    Flood-fill background removal that strips both white outer canvas (R>210, G>210, B>210)
+    AND dark grid boxes/lines (R<55, G<55, B<65) connected to the outer boundary,
+    preserving character pixel colors, outlines, and body intact.
+    """
+    crop = crop_img.convert("RGBA")
+    arr = np.array(crop)
+    h, w, _ = arr.shape
+
+    bg_mask = np.zeros((h, w), dtype=bool)
+    for y in range(h):
+        for x in range(w):
+            r, g, b, _ = arr[y, x]
+            if (r > 210 and g > 210 and b > 210) or (r < 55 and g < 55 and b < 65):
+                bg_mask[y, x] = True
+
+    visited = np.zeros((h, w), dtype=bool)
+    queue = deque()
+
+    for x in range(w):
+        if bg_mask[0, x]:
+            queue.append((0, x))
+            visited[0, x] = True
+        if bg_mask[h - 1, x]:
+            queue.append((h - 1, x))
+            visited[h - 1, x] = True
+    for y in range(h):
+        if bg_mask[y, 0]:
+            queue.append((y, 0))
+            visited[y, 0] = True
+        if bg_mask[y, w - 1]:
+            queue.append((y, w - 1))
+            visited[y, w - 1] = True
+
+    while queue:
+        cy, cx = queue.popleft()
+        for dy, dx in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+            ny, nx = cy + dy, cx + dx
+            if 0 <= ny < h and 0 <= nx < w and not visited[ny, nx]:
+                if bg_mask[ny, nx]:
+                    visited[ny, nx] = True
+                    queue.append((ny, nx))
+
+    for y in range(h):
+        for x in range(w):
+            if visited[y, x]:
+                arr[y, x] = [0, 0, 0, 0]
+
+    return Image.fromarray(arr)
 
 for char_name, src_path in chars:
     if not os.path.exists(src_path):
         continue
-        
+
     raw_master = os.path.join(RAW_DIR, f"{char_name}_master_1024.jpg")
     shutil.copyfile(src_path, raw_master)
-    print(f"Preserved master: {raw_master}")
+    print(f"Processing master: {src_path}")
 
     img = Image.open(src_path)
-    width, height = img.size
-
     char_sprites = []
 
-    for row_idx, y_min, y_max, anim_list in anim_rows:
-        total_frames_in_row = sum(fc for _, fc in anim_list)
-        # Grid width approximately spans 50..950
-        x_start = 20
-        x_end = 980
-        cell_width = (x_end - x_start) / 7.5 # up to 7-8 cells per row
+    for y_min, y_max, anim_list in anim_rows:
+        total_cols = sum(fc for _, fc in anim_list)
+        col_w = img.width / total_cols
 
-        cur_frame_idx = 0
+        col_idx = 0
         for anim_name, frame_count in anim_list:
             for f in range(frame_count):
-                x_min = int(x_start + (cur_frame_idx) * cell_width)
-                x_max = int(x_start + (cur_frame_idx + 1) * cell_width)
-                box = (x_min, y_min, x_max, y_max)
-                
-                crop_img = img.crop(box)
-                rgba_img = remove_background_chroma(crop_img, bg_color=(255, 255, 255), tolerance=25)
+                x_min = int(col_idx * col_w)
+                x_max = int((col_idx + 1) * col_w)
+
+                cell = img.crop((x_min, y_min, x_max, y_max))
+                cleaned = remove_outer_background(cell)
 
                 frame_id = f"char_{char_name}_{anim_name}_{f}"
-                
-                # Save raw frame
-                raw_frame_path = os.path.join(RAW_DIR, f"{frame_id}_raw.png")
-                rgba_img.save(raw_frame_path, "PNG")
 
-                # Resize to standard 48x48
+                # Trim bounding box around non-transparent character pixels
+                bbox = cleaned.getbbox()
+                if bbox:
+                    trimmed = cleaned.crop(bbox)
+                else:
+                    trimmed = cleaned
+
+                w_trim, h_trim = trimmed.size
+
+                # Scale character smoothly while preserving aspect ratio (max 40x42 inside 48x48)
+                scale = min(38.0 / max(w_trim, 1), 42.0 / max(h_trim, 1))
+                w_new = max(1, int(w_trim * scale))
+                h_new = max(1, int(h_trim * scale))
+
+                scaled = trimmed.resize((w_new, h_new), Image.Resampling.LANCZOS)
+
+                # Center character: feet anchored at y=44, centered horizontally at x=24
                 resized = Image.new("RGBA", (48, 48), (0, 0, 0, 0))
-                w_orig, h_orig = rgba_img.size
-                scale = min(44.0 / w_orig, 44.0 / h_orig)
-                w_new = int(w_orig * scale)
-                h_new = int(h_orig * scale)
-
-                scaled = rgba_img.resize((w_new, h_new), Image.Resampling.LANCZOS)
                 off_x = (48 - w_new) // 2
-                off_y = (48 - h_new) // 2
+                off_y = 44 - h_new  # Align feet to baseline y=44
+
                 resized.paste(scaled, (off_x, off_y), scaled)
 
                 char_sprites.append((frame_id, resized))
-                cur_frame_idx += 1
+                col_idx += 1
 
     create_phaser_atlas(
         sprite_list=char_sprites,
@@ -88,4 +136,4 @@ for char_name, src_path in chars:
         cell_size=(48, 48)
     )
 
-print("\n--- Character Atlases Processing Complete! ---")
+print("\n--- All 4 Character Atlases Cleaned & Re-Processed! ---")

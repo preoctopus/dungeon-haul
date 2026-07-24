@@ -101,6 +101,26 @@ Each character atlas provides 48×48 px cells with the following animation frame
 | **Hurt** | `char_{char}_hurt_0` .. `char_{char}_hurt_2` | 10 fps | `repeat: 0` |
 | **Stunned** | `char_{char}_stunned_0` .. `char_{char}_stunned_3` | 8 fps | `repeat: -1` |
 
+#### 3.1.1 Sprite Cell Alignment & Origin Specifications
+
+To ensure smooth animations without ground jitter or horizontal shifting across state transitions:
+
+1. **Cell Bounding Box:** All character frames are normalized to **48×48 px**.
+2. **Ground Contact Line (Feet Baseline):** Character feet are anchored to **`y = 44`** in the 48×48 cell space.
+3. **Horizontal Center of Gravity:** Character torso center is aligned to **`x = 24`** (horizontal mid-point).
+4. **Phaser 3 Origin:** Always configure character physics sprites with **`setOrigin(0.5, 1.0)`** (bottom-center anchor).
+
+```typescript
+// Recommended Phaser 3 Character Sprite Initialization
+const player = scene.physics.add.sprite(x, y, 'char_gnome', 'char_gnome_idle_0');
+player.setOrigin(0.5, 1.0); // Bottom-center origin (feet align to ground physics body)
+player.body.setSize(24, 40); // 24x40 px physics hitbox
+player.body.setOffset(12, 4); // Centered offset within 48x48 cell
+
+// Carry Stack Mount Coordinate (above hauler head)
+const CARRY_STACK_OFFSET_Y = -44; // Mount point for loot stack above feet baseline
+```
+
 #### Phaser Character Animation Setup Example:
 
 ```typescript
@@ -132,6 +152,7 @@ function createCharacterAnimations(scene: Phaser.Scene, charName: string) {
 ```
 
 ---
+
 
 ### 3.2 Treasures (`atlas_treasures`)
 

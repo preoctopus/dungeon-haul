@@ -6,6 +6,7 @@
 import { DEFAULT_AI_CONFIG, type AiConfig } from "@dhaul/ai";
 import type { EncumbranceConfig } from "@dhaul/rules";
 import { ENCUMBRANCE_DEFAULT } from "@dhaul/rules";
+import { DEFAULT_FORK_CONFIG, type ForkConfig } from "./fork.js";
 import type { HazardConfig } from "./hazards.js";
 import { DEFAULT_KINEMATICS, type KinematicsConfig } from "./kinematics.js";
 
@@ -63,6 +64,8 @@ export interface SimConfig {
    * that isolate human/loot/trap behavior. Production leaves this true.
    */
   enableAi: boolean;
+  /** Fork Vote Subsystem tuning (C-10): window length, AI argue policy, tie-break. */
+  fork: ForkConfig;
 }
 
 export const DEFAULT_SIM_CONFIG: SimConfig = {
@@ -95,4 +98,5 @@ export const DEFAULT_SIM_CONFIG: SimConfig = {
   sand: { friction: 1.6, maxSpeed: 0.65 },
   ai: { ...DEFAULT_AI_CONFIG },
   enableAi: true,
+  fork: { ...DEFAULT_FORK_CONFIG },
 };

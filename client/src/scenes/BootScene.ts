@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import { getShellNavigator } from "../shell/registry.js";
 
 /** Shape of client/public/assets/manifest.json (written by the asset pipeline). */
 interface ManifestAtlas {
@@ -98,5 +99,6 @@ export class BootScene extends Phaser.Scene {
 
   create(_params: BootParams): void {
     this.cameras.main.setBackgroundColor("#1a1626");
+    getShellNavigator(this).goTitle();
   }
 }

@@ -23,7 +23,7 @@ Approximate; design docs under `components/<name>/` remain binding for behavior.
 | C-07 | Rules engine | **Done (P1)** — catalog, modifiers, payout, encumbrance | `packages/rules/` |
 | C-08 | AI controller | **Done (P3)** — pure decide cascade | `packages/ai/` |
 | C-09 | Level loader | **Done (P1)** — parser, fixtures, validator | `packages/levels/` |
-| C-10 | Fork vote | Not started | — |
+| C-10 | Fork vote | **Done (P4)** — `ForkVoteModule`, pair-pick, tally/tie-break, AI fallback driver | `server/src/sim/fork.ts` |
 | C-11 | End screen | Not started | — |
 | C-12 | High scores | Not started (P5) | — |
 | C-13 | Audio director | Not started (assets may exist) | — |

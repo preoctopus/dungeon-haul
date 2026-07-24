@@ -17,13 +17,22 @@ import type {
   GameEvent,
   HaulerPublic,
   InputCommand,
+  ScoreReport,
   SeatId,
   SeatPublic,
+  SessionPhase,
   WorldSnapshot,
 } from "@dhaul/protocol";
-import { computeEncumbrance, type PlayerStats } from "@dhaul/rules";
+import {
+  buildScoreReport,
+  computeEncumbrance,
+  type PlayerStats,
+  type ScoreSeat,
+} from "@dhaul/rules";
 import type { SimConfig } from "./config.js";
 import { DEFAULT_SIM_CONFIG } from "./config.js";
+import type { ForkLevelMeta, ForkPublicState, ForkResult } from "./fork.js";
+import { ForkVoteModule } from "./fork.js";
 import { footCell, solidGridFromLevel, spawnWorldPos } from "./grid.js";
 import { Hazards } from "./hazards.js";
 import {
@@ -93,19 +102,36 @@ export interface TickResult {
 
 export class Simulation {
   readonly config: SimConfig;
-  readonly level: LevelDefinition;
-  private readonly grid: SolidGrid;
+  level: LevelDefinition;
+  private grid: SolidGrid;
   private readonly seats: SeatRuntime[];
-  private readonly treasures: TreasureSystem;
-  private readonly hazards: Hazards;
-  private readonly rng: Mulberry32;
-  private readonly exitAABB: AABB;
+  private treasures: TreasureSystem;
+  private hazards: Hazards;
+  private rng: Mulberry32;
+  private exitAABB: AABB;
   private tickCount = 0;
   private exitCounter = 0;
   private levelComplete = false;
+  private phaseValue: SessionPhase;
+  /** Hoard does not count toward `levelsAfterHoard` (DESIGN §9.3). */
+  private isHoardLevel = false;
+  private levelsCompletedCount = 0;
+  private readonly forkModule: ForkVoteModule;
+  /** Level ids already loaded this run (fork-vote DESIGN §5.4 unplayed pool). */
+  private readonly playedLevelIds = new Set<string>();
+  /** Cached once end scoring runs (C06-T26); re-entry must not re-score. */
+  private endScoreReportCache?: ScoreReport;
+  /** High-score name entries submitted via C2S_NameEntry (C06-T27). */
+  private readonly endNames = new Map<SeatId, string>();
 
-  constructor(level: LevelDefinition, config: SimConfig = DEFAULT_SIM_CONFIG) {
+  constructor(
+    level: LevelDefinition,
+    config: SimConfig = DEFAULT_SIM_CONFIG,
+    initialPhase: SessionPhase = "level",
+  ) {
     this.config = config;
+    this.forkModule = new ForkVoteModule(config.fork);
+    this.phaseValue = initialPhase;
     this.level = level;
     this.grid = solidGridFromLevel(level);
     this.exitAABB = { ...level.exit };
@@ -159,12 +185,111 @@ export class Simulation {
     return this.tickCount;
   }
 
+  get phase(): SessionPhase {
+    return this.phaseValue;
+  }
+
+  /** Count of completed post-Hoard levels this run (DESIGN §9.3). */
+  get levelsCompleted(): number {
+    return this.levelsCompletedCount;
+  }
+
+  /** Whether the currently loaded level is Hoard (excluded from the count). */
+  get isHoard(): boolean {
+    return this.isHoardLevel;
+  }
+
+  /**
+   * Enter the fork phase (DESIGN §10.3): freezes physics/AI and opens the
+   * C-10 vote — an unplayed level pair picked from `pool`, argue-pulse
+   * tallying over `config.fork.windowTicks`. `pool`/`levelMeta` come from the
+   * server content layer (`server/src/content.ts`); the pure sim never
+   * touches disk.
+   */
+  enterFork(
+    pool: readonly string[],
+    levelMeta: (levelId: string) => ForkLevelMeta,
+  ): ForkPublicState {
+    this.phaseValue = "fork";
+    return this.forkModule.open({
+      tick: this.tickCount,
+      seats: this.seats.map((s) => ({ seatId: s.seatId, control: s.control })),
+      rng: this.rng,
+      playedLevelIds: this.playedLevelIds,
+      pool,
+      levelMeta,
+      windowTicks: this.config.fork.windowTicks,
+    });
+  }
+
+  /** True once the fork vote window has elapsed and a winner is resolved. */
+  isForkResolved(): boolean {
+    return this.phaseValue === "fork" && !this.forkModule.isActive() && this.forkModule.getResult() !== undefined;
+  }
+
+  /** Winning option/level once `isForkResolved()` is true. */
+  get forkResult(): ForkResult | undefined {
+    return this.forkModule.getResult();
+  }
+
+  /** Live public fork state (options, tallies, endsAtTick) for broadcast. */
+  getForkPublicState(): ForkPublicState {
+    return this.forkModule.getPublicState();
+  }
+
+  /**
+   * Load a new level in place, preserving seat inventories/stats/control
+   * (DESIGN §9.1). Resets per-level transient state (stun, exit, held input).
+   */
+  loadLevel(
+    level: LevelDefinition,
+    phase: SessionPhase,
+    opts?: { isHoard?: boolean },
+  ): void {
+    this.isHoardLevel = opts?.isHoard ?? false;
+    if (phase === "level") this.playedLevelIds.add(level.id);
+    this.level = level;
+    this.grid = solidGridFromLevel(level);
+    this.exitAABB = { ...level.exit };
+    this.rng = new Mulberry32(deriveSeed(this.config.rngSeed, level.id));
+
+    const tPhys: TreasurePhysicsConfig = {
+      gravity: this.config.kinematics.gravity,
+      maxFallSpeed: this.config.kinematics.maxFallSpeed,
+      dt: this.config.kinematics.dt,
+      drag: 0.92,
+    };
+    this.treasures = new TreasureSystem(tPhys);
+    this.treasures.spawnFromLevel(level, this.rng, level.id);
+    this.hazards = new Hazards(level, this.config.hazards);
+
+    for (const seat of this.seats) {
+      const spawn = spawnWorldPos(level, seat.seatId);
+      seat.body = createBody(spawn.x, spawn.y);
+      seat.held = { ...NEUTRAL_INPUT };
+      seat.heldAction = false;
+      seat.heldActionPrev = false;
+      seat.heldAxisY = 0;
+      seat.stunnedUntilTick = 0;
+      seat.pickupLockoutUntilTick = 0;
+      seat.exited = false;
+      seat.exitOrder = 0;
+      seat.aiStuckTicks = 0;
+    }
+
+    this.exitCounter = 0;
+    this.levelComplete = false;
+    this.phaseValue = phase;
+  }
+
   /**
    * Queue a validated human command (input-commands.md §Encoding notes):
    * seq must increase — duplicates/reordered ignored, gaps tolerated.
    * Returns false if the command was ignored.
    */
   applyInput(seatId: SeatId, cmd: InputCommand): boolean {
+    // No free-run in end sub-phases (C06-T27): only C2S_EndSkip/NameEntry apply.
+    if (this.phaseValue.startsWith("end_")) return false;
     const seat = this.seats[seatId];
     if (!seat) return false;
     if (cmd.seq <= seat.lastQueuedSeq) return false; // dup / stale
@@ -218,6 +343,18 @@ export class Simulation {
   /** Advance exactly one fixed tick. Never call with wall-clock dt. */
   step(): TickResult {
     this.tickCount += 1;
+
+    // Fork vote micro-step (DESIGN §6.2): no physics, just input→tally→resolve.
+    if (this.phaseValue === "fork") {
+      return this.stepFork();
+    }
+
+    // Phase-gated physics free-run (DESIGN §10.3): only instructions/level
+    // simulate movement; fork and end_* freeze until the room advances phase.
+    if (this.phaseValue !== "instructions" && this.phaseValue !== "level") {
+      return { snapshot: this.buildSnapshot(), events: [] };
+    }
+
     const events: GameEvent[] = [];
     const kin = this.config.kinematics;
     const cfg = this.config;
@@ -272,9 +409,9 @@ export class Simulation {
     }
 
     // --- Step 1b: AI decide for remaining AI seats (C-08; human-first order) ---
-    // Phase gating: AI active on level/fork (hoard is phase=level). P4 will
-    // suppress AI on instructions; we only run level content in P3.
-    if (cfg.enableAi) {
+    // Phase gating (simulation DESIGN §6.3): AI absent during instructions —
+    // active from Hoard onward.
+    if (cfg.enableAi && this.phaseValue !== "instructions") {
       const aiView = this.buildAiWorldView();
       for (const seat of this.seats) {
         if (seat.control !== "ai") continue;
@@ -459,9 +596,20 @@ export class Simulation {
 
     // --- Step 5: Level complete? ---
     if (!this.levelComplete) {
-      const allExited = this.seats.every((s) => s.exited);
+      // Instructions phase (C06-T22): only active humans need to exit — AI
+      // is absent and unbound seats should not block the transition. A room
+      // with nobody bound yet (fresh room, no joins) must not vacuously
+      // complete — otherwise the sim races ahead of the first client's join.
+      const allExited =
+        this.phaseValue === "instructions"
+          ? this.seats.some((s) => s.humanId !== undefined) &&
+            this.seats.every((s) => s.humanId === undefined || s.exited)
+          : this.seats.every((s) => s.exited);
       if (allExited) {
         this.levelComplete = true;
+        if (this.phaseValue === "level" && !this.isHoardLevel) {
+          this.levelsCompletedCount++;
+        }
         // Last exit order = highest exitOrder among seats that left.
         for (const seat of this.seats) {
           if (seat.exitOrder === this.exitCounter && this.exitCounter > 0) {
@@ -483,6 +631,35 @@ export class Simulation {
       seat.heldActionPrev = seat.heldAction;
     }
 
+    return { snapshot: this.buildSnapshot(), events };
+  }
+
+  /**
+   * Fork phase active-tick order (DESIGN §6.2): apply fork-context inputs
+   * for all seats (human queue drain + AI fallback driver), then tick the
+   * vote module, which auto-resolves once the window elapses.
+   */
+  private stepFork(): TickResult {
+    for (const seat of this.seats) {
+      const cmd = seat.queue.shift();
+      if (cmd) {
+        seat.lastProcessedSeq = cmd.seq;
+        this.forkModule.applyForkInput(seat.seatId, cmd, this.tickCount);
+      }
+      if (seat.control === "ai" && this.config.enableAi) {
+        this.forkModule.driveAiSeat(seat.seatId, this.rng);
+      }
+    }
+    const { resolved } = this.forkModule.tick(this.tickCount);
+    const events: GameEvent[] = [];
+    if (resolved) {
+      events.push({
+        type: "fork_resolved",
+        optionId: resolved.winningOptionId,
+        levelId: resolved.levelId,
+        tallies: resolved.tallies,
+      });
+    }
     return { snapshot: this.buildSnapshot(), events };
   }
 
@@ -529,7 +706,7 @@ export class Simulation {
     const exit = this.exitAABB;
     return {
       tick: this.tickCount,
-      phase: "level",
+      phase: this.phaseValue,
       levelId: this.level.id,
       blockSizePx: this.level.blockSizePx,
       haulers: this.seats.map((seat) => ({
@@ -791,9 +968,9 @@ export class Simulation {
     });
     return {
       tick: this.tickCount,
-      phase: "level",
+      phase: this.phaseValue,
       levelId: this.level.id,
-      levelsCompleted: 0,
+      levelsCompleted: this.levelsCompletedCount,
       levelsAfterHoard: this.config.levelsAfterHoard,
       lastProcessedInputSeq,
       haulers,
@@ -848,6 +1025,94 @@ export class Simulation {
   /** Treasure conservation ledger for invariant tests. */
   treasureLedger() {
     return this.treasures.ledger();
+  }
+
+  /**
+   * End scoring handoff (DESIGN §10.4, C06-T26): build ScoreContext from seat
+   * runtime state, call the pure rules engine, and cache the result so a
+   * second call (e.g. on phase re-entry) never re-runs computeTakes.
+   */
+  buildEndScoreReport(sessionId: string, completionToken: string): ScoreReport {
+    if (this.endScoreReportCache) return this.endScoreReportCache;
+
+    const scoreSeats: ScoreSeat[] = this.seats.map((seat) => ({
+      seatId: seat.seatId,
+      character: seat.character,
+      human: seat.control === "human",
+      stats: seat.stats,
+      finalInventory: seat.carryStack.map((t) => ({
+        instanceId: t.instanceId,
+        defId: t.defId,
+        valueOverrideGp: t.valueGp,
+      })),
+      hoardExitInventoryCount: seat.stats.hoardExitItemCount,
+    }));
+
+    const rulesReport = buildScoreReport({
+      sessionId,
+      seats: scoreSeats,
+      levelsCompleted: this.levelsCompletedCount,
+      completionToken,
+    });
+
+    const report: ScoreReport = {
+      rulesetVersion: rulesReport.rulesetVersion,
+      sessionId: rulesReport.sessionId,
+      totalTreasureGp: rulesReport.totalTreasureGp,
+      players: rulesReport.players,
+      completionToken: rulesReport.completionToken,
+    };
+    this.endScoreReportCache = report;
+    return report;
+  }
+
+  /**
+   * Advance the end sub-phase machine on `C2S_EndSkip` (DESIGN §10.2/§10.4,
+   * C06-T27): end_count -> end_shares -> end_spoils -> (end_entry if any
+   * seat qualifies for a high score, else closed) -> closed. Returns false
+   * if not currently in an end sub-phase (nothing to advance).
+   */
+  skipEnd(): boolean {
+    switch (this.phaseValue) {
+      case "end_count":
+        this.phaseValue = "end_shares";
+        return true;
+      case "end_shares":
+        this.phaseValue = "end_spoils";
+        return true;
+      case "end_spoils":
+        this.phaseValue = this.hasEligibleHighScorePlayer() ? "end_entry" : "closed";
+        return true;
+      case "end_entry":
+        this.phaseValue = "closed";
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  private hasEligibleHighScorePlayer(): boolean {
+    return this.endScoreReportCache?.players.some((p) => p.eligibleForHighScore) ?? false;
+  }
+
+  /**
+   * Record a high-score name entry (C06-T27): only in `end_entry`, only for
+   * a human, eligible (per the cached ScoreReport), single-submit seat.
+   */
+  recordEndName(seatId: SeatId, name: string): boolean {
+    if (this.phaseValue !== "end_entry") return false;
+    const seat = this.seats[seatId];
+    if (!seat || seat.control !== "human") return false;
+    if (this.endNames.has(seatId)) return false;
+    const player = this.endScoreReportCache?.players.find((p) => p.seatId === seatId);
+    if (!player?.eligibleForHighScore) return false;
+    this.endNames.set(seatId, name);
+    return true;
+  }
+
+  /** Submitted high-score name for a seat, if any (C06-T27). */
+  getEndName(seatId: SeatId): string | undefined {
+    return this.endNames.get(seatId);
   }
 
   /** Whether all haulers have exited the level. */

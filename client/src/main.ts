@@ -1,13 +1,9 @@
 import Phaser from "phaser";
 import { ManifestLoader, BootScene } from "./scenes/BootScene";
 import { mountDevLobby } from "./devLobby";
+import { createGame } from "./shell/bootstrap.js";
 
-/** Frozen logical resolution: 960×540, integer-friendly FIT + letterbox. */
-export const LOGICAL_WIDTH = 960;
-export const LOGICAL_HEIGHT = 540;
-
-const game = new Phaser.Game({
-  type: Phaser.AUTO,
+const game = createGame({
   parent: "game",
   width: LOGICAL_WIDTH,
   height: LOGICAL_HEIGHT,

@@ -74,6 +74,13 @@ export interface HumanTakeoverEvent {
   seatId: number;
 }
 
+export interface ForkResolvedEvent {
+  type: "fork_resolved";
+  optionId: "A" | "B";
+  levelId: string;
+  tallies: { A: number; B: number };
+}
+
 export type GameEvent =
   | PickupEvent
   | DropEvent
@@ -85,4 +92,5 @@ export type GameEvent =
   | LevelExitEvent
   | SwitchEvent
   | AiTakeoverEvent
-  | HumanTakeoverEvent;
+  | HumanTakeoverEvent
+  | ForkResolvedEvent;

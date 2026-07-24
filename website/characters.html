@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Haulers & Classes — Dungeon Haul</title>
+  <meta name="description" content="Meet the four distinct character classes of Dungeon Haul: Gnome, Sprite, Halfling, and Dwarf. Learn their unique playstyles, backstories, and stats!">
+  
+  <!-- CSS Stylesheet -->
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar" aria-label="Main Navigation">
+    <div class="navbar-container">
+      <a href="index.html" class="brand-logo">
+        <div class="brand-icon">DH</div>
+        <span class="brand-title">DUNGEON HAUL</span>
+      </a>
+
+      <ul class="nav-links">
+        <li><a href="index.html" class="nav-link">Home</a></li>
+        <li><a href="characters.html" class="nav-link active">The Haulers</a></li>
+        <li><a href="instructions.html" class="nav-link">Instructions</a></li>
+        <li><a href="credits.html" class="nav-link">Credits</a></li>
+        <li>
+          <a href="play.html" class="btn-play-nav">
+            <span>🎮</span> PLAY DEMO
+          </a>
+        </li>
+      </ul>
+
+      <button class="nav-toggle" aria-label="Toggle navigation menu">☰</button>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Dungeon Hauler Roster</span>
+        <h1 class="section-title gold-gradient-text">Choose Your Class</h1>
+        <p class="section-desc">
+          Four soft-unique character classes bring distinct visual styles, color-coded seat identities, and rich personality to every dungeon run. Click a hauler below to inspect their stats and lore!
+        </p>
+      </div>
+
+      <!-- Character Class Tab Switcher -->
+      <div class="char-nav-tabs">
+        <button class="char-tab-btn active" data-char="gnome">
+          <span>🧙‍♂️</span> GNOME (AMBER)
+        </button>
+        <button class="char-tab-btn" data-char="sprite">
+          <span>🧚‍♀️</span> SPRITE (SKY BLUE)
+        </button>
+        <button class="char-tab-btn" data-char="halfling">
+          <span>🧑‍🌾</span> HALFLING (MAGENTA)
+        </button>
+        <button class="char-tab-btn" data-char="dwarf">
+          <span>🧔</span> DWARF (CRIMSON)
+        </button>
+      </div>
+
+      <!-- Detailed Character Card Container -->
+      <article class="char-hero-card">
+        <div>
+          <div class="char-avatar-frame">
+            <img id="char-img" src="assets/images/action_portrait_gnome.png" alt="Gnome Action Character Portrait">
+          </div>
+        </div>
+
+        <div>
+          <span id="char-badge" class="char-badge gnome">Gnome</span>
+          <h2 id="char-name" style="font-size: 2.2rem; margin-bottom: 0.25rem;">Gnome</h2>
+          <h3 id="char-title" style="font-size: 1.1rem; color: var(--gold-primary); font-family: var(--font-body); margin-bottom: 1.25rem;">
+            The Crafty Tinkerer
+          </h3>
+
+          <p id="char-backstory" style="color: var(--text-muted); font-size: 1rem; margin-bottom: 1.5rem;">
+            Originating from the lower mechanical gear-works of the ancient dungeon, the Gnome is quick-witted, agile, and obsessed with ancient relics. Standing low to the ground with an iconic pointed amber hat, they can slip right under swinging pendulum traps and snatch gold coins before larger rivals even notice!
+          </p>
+
+          <div style="background: rgba(0,0,0,0.3); border: 1px solid var(--border-gold); padding: 1rem; border-radius: var(--radius-sm); margin-bottom: 1.5rem;">
+            <strong style="color: var(--gold-light); font-size: 0.85rem; font-family: var(--font-pixel); display: block; margin-bottom: 0.5rem;">
+              ⚡ UNIQUE PASSIVE TRAIT:
+            </strong>
+            <p id="char-special" style="font-size: 0.9rem; color: var(--text-main);">
+              Low Profile — Lower collision height when crouching, perfect for dodging overhead lightning traps and sneaking into hoard vaults.
+            </p>
+          </div>
+
+          <!-- Stat Meter Bars -->
+          <div class="stat-bar-group">
+            <div class="stat-row">
+              <span class="stat-label">SPEED</span>
+              <div class="stat-track">
+                <div id="stat-speed" class="stat-fill" style="width: 90%; background: var(--hauler-gnome); box-shadow: 0 0 10px var(--hauler-gnome-glow);"></div>
+              </div>
+            </div>
+
+            <div class="stat-row">
+              <span class="stat-label">JUMP HEIGHT</span>
+              <div class="stat-track">
+                <div id="stat-jump" class="stat-fill" style="width: 85%; background: var(--hauler-gnome); box-shadow: 0 0 10px var(--hauler-gnome-glow);"></div>
+              </div>
+            </div>
+
+            <div class="stat-row">
+              <span class="stat-label">CARRY POWER</span>
+              <div class="stat-track">
+                <div id="stat-strength" class="stat-fill" style="width: 60%; background: var(--hauler-gnome); box-shadow: 0 0 10px var(--hauler-gnome-glow);"></div>
+              </div>
+            </div>
+
+            <div class="stat-row">
+              <span class="stat-label">SABOTAGE</span>
+              <div class="stat-track">
+                <div id="stat-sabotage" class="stat-fill" style="width: 75%; background: var(--hauler-gnome); box-shadow: 0 0 10px var(--hauler-gnome-glow);"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- Full Character Spotlight Poster Card -->
+      <section style="margin-top: 4rem; text-align: center;">
+        <div class="section-header">
+          <span class="section-tag">Featured Artwork</span>
+          <h2 class="section-title gold-gradient-text">Hero Spotlight Poster</h2>
+        </div>
+
+        <div class="showcase-item" style="max-width: 700px; margin: 0 auto; aspect-ratio: 1 / 1; border: 3px solid var(--border-gold); border-radius: var(--radius-lg); box-shadow: 0 0 40px var(--gold-glow);">
+          <img src="assets/images/character_spotlight_grid.png" alt="Realm Adventurers Hero Spotlight Grid">
+        </div>
+      </section>
+
+      <!-- Roster Comparison Table -->
+      <section style="margin-top: 4rem;">
+        <h2 style="text-align: center; margin-bottom: 2rem;" class="gold-gradient-text">Class Overview Matrix</h2>
+
+        <div style="background: var(--bg-card); border: 1px solid var(--border-muted); border-radius: var(--radius-md); overflow-x: auto;">
+          <table class="modifier-table">
+            <thead>
+              <tr>
+                <th>Class</th>
+                <th>Seat Color</th>
+                <th>Archetype</th>
+                <th>Best Trait</th>
+                <th>Playstyle Strategy</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong style="color: var(--hauler-gnome);">Gnome</strong></td>
+                <td>Amber / Orange</td>
+                <td>Speed & Dodge</td>
+                <td>Low Crouch Silhouette</td>
+                <td>Blitz to high-value unique treasures first; slip under overhead hazards.</td>
+              </tr>
+              <tr>
+                <td><strong style="color: var(--hauler-sprite);">Sprite</strong></td>
+                <td>Sky Blue</td>
+                <td>Air Mobility</td>
+                <td>Feather Jump Apex</td>
+                <td>Leap over lava channels and hover above crumbling collapse traps.</td>
+              </tr>
+              <tr>
+                <td><strong style="color: var(--hauler-halfling);">Halfling</strong></td>
+                <td>Magenta / Pink</td>
+                <td>Heavy Hoarder</td>
+                <td>Stack Weight Resistance</td>
+                <td>Grab complete treasure suit sets (Armor, Divine) for maximum GP multiplier.</td>
+              </tr>
+              <tr>
+                <td><strong style="color: var(--hauler-dwarf);">Dwarf</strong></td>
+                <td>Crimson / Red</td>
+                <td>Power Brawler</td>
+                <td>Knockback Shoulder Push</td>
+                <td>Push greedy haulers into traps to force gold spill, then claim their loot!</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-container">
+      <div class="footer-brand">
+        <a href="index.html" class="brand-logo">
+          <div class="brand-icon">DH</div>
+          <span class="brand-title">DUNGEON HAUL</span>
+        </a>
+        <p>A multiplayer arcade sidescroller about gold, traps, and slapstick sabotage.</p>
+      </div>
+
+      <div>
+        <h4 class="footer-column-title">Explore</h4>
+        <ul class="footer-links">
+          <li><a href="index.html">Home Overview</a></li>
+          <li><a href="characters.html">Character Classes</a></li>
+          <li><a href="instructions.html">Rules & Controls</a></li>
+          <li><a href="play.html">Arcade Playground</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4 class="footer-column-title">Credits & Info</h4>
+        <ul class="footer-links">
+          <li><a href="credits.html">Development Team</a></li>
+          <li><a href="credits.html#tojam">TOJam 8 Background</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>&copy; 2026 Dungeon Haul Remake. Game Design by Greg Beaton • Developed by Andrew Tarzwell.</p>
+      <p>Built with Phaser 3 & Colyseus Architecture.</p>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="js/main.js"></script>
+</body>
+</html>

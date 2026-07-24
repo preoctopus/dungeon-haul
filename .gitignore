@@ -17,5 +17,13 @@ dist/
 *.log
 .DS_Store
 coverage/
-chatlogs/
+chatlogs.old/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.venv/
+venv/
 

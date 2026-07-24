@@ -12,19 +12,31 @@
 import { CloseCode, Room, ServerError, type Client } from "@colyseus/core";
 import {
   COLYSEUS_ERROR_CODES,
+  isC2SEndSkip,
   isC2SInput,
+  isC2SNameEntry,
   isJoinOptions,
   protocolVersion,
   type GameEvent,
   type S2C_Error,
+  type S2C_ForkState,
+  type S2C_PhaseChange,
   type S2C_Pong,
+  type S2C_ScoreReport,
   type S2C_SeatUpdate,
   type S2C_Snapshot,
   type S2C_Welcome,
   type SeatId,
 } from "@dhaul/protocol";
-import { getLevel, P2_LEVEL_ID } from "../content.js";
+import {
+  getForkLevelMeta,
+  getLevel,
+  getPlayablePool,
+  HOARD_LEVEL_ID,
+  INSTRUCTIONS_LEVEL_ID,
+} from "../content.js";
 import type { LobbyService } from "../lobby/service.js";
+import { issueToken } from "../session/tokens.js";
 import { DEFAULT_SIM_CONFIG } from "../sim/config.js";
 import { Simulation } from "../sim/simulation.js";
 
@@ -63,7 +75,11 @@ export class HaulSession extends Room {
   override onCreate(): void {
     this.maxClients = 4;
     this.autoDispose = false; // lobby owns lifecycle (created before first WS join)
-    this.sim = new Simulation(getLevel(P2_LEVEL_ID), DEFAULT_SIM_CONFIG);
+    this.sim = new Simulation(
+      getLevel(INSTRUCTIONS_LEVEL_ID),
+      DEFAULT_SIM_CONFIG,
+      "instructions",
+    );
     this.startedAtMs = Date.now();
 
     this.onMessage("input", (client, payload: unknown) => this.handleInput(client, payload));
@@ -78,6 +94,10 @@ export class HaulSession extends Room {
     this.onMessage("leave", (client) => {
       client.leave(CloseCode.CONSENTED);
     });
+    this.onMessage("end_skip", (client, payload: unknown) => this.handleEndSkip(client, payload));
+    this.onMessage("name_entry", (client, payload: unknown) =>
+      this.handleNameEntry(client, payload),
+    );
     // Forward-compatibility: ignore unknown channels silently.
     this.onMessage("*", () => undefined);
 
@@ -139,7 +159,7 @@ export class HaulSession extends Room {
       rngSeed: this.sim.config.rngSeed,
       rulesetVersion: this.sim.config.rulesetVersion,
       tickRate: 30,
-      phase: "level",
+      phase: this.sim.phase,
       snapshot: this.sim.buildSnapshot(),
     };
     client.send("welcome", welcome);
@@ -192,6 +212,22 @@ export class HaulSession extends Room {
     this.sim.applyInput(m.seatId, payload.command);
   }
 
+  private handleEndSkip(client: Client, payload: unknown): void {
+    const m = this.meta.get(client.sessionId);
+    if (!m) return;
+    if (!isC2SEndSkip(payload)) return; // drop malformed silently (untrusted)
+    if (this.sim.skipEnd()) {
+      this.broadcastPhaseChange(this.sim.phase);
+    }
+  }
+
+  private handleNameEntry(client: Client, payload: unknown): void {
+    const m = this.meta.get(client.sessionId);
+    if (!m) return;
+    if (!isC2SNameEntry(payload)) return; // drop malformed silently (untrusted)
+    this.sim.recordEndName(m.seatId, payload.name);
+  }
+
   private tick(): void {
     const { snapshot, events } = this.sim.step();
     const msg: S2C_Snapshot = { type: "snapshot", snapshot };
@@ -200,6 +236,28 @@ export class HaulSession extends Room {
       this.broadcastEvents(events);
       this.broadcastSeatUpdate();
     }
+
+    if (this.sim.phase === "instructions" && this.sim.isLevelComplete()) {
+      this.sim.loadLevel(getLevel(HOARD_LEVEL_ID), "level", { isHoard: true });
+      this.broadcastPhaseChange("level");
+    } else if (this.sim.phase === "level" && this.sim.isLevelComplete()) {
+      // Hoard always forks; post-hoard levels fork until levelsAfterHoard,
+      // then end (C06-T24/T26).
+      if (this.sim.isHoard || this.sim.levelsCompleted < this.sim.config.levelsAfterHoard) {
+        this.enterFork();
+      } else {
+        this.enterEnd();
+      }
+    } else if (this.sim.phase === "fork") {
+      if (this.sim.isForkResolved()) {
+        const levelId = this.sim.forkResult!.levelId;
+        this.sim.loadLevel(getLevel(levelId), "level");
+        this.broadcastPhaseChange("level");
+      } else {
+        this.broadcastForkState();
+      }
+    }
+
     // Tick lag metric (Implementation Plan P2 exit criterion).
     if (snapshot.tick % TICK_LAG_LOG_EVERY === 0) {
       const expectedMs = this.startedAtMs + snapshot.tick * TICK_MS;
@@ -208,6 +266,61 @@ export class HaulSession extends Room {
         `[haul_session ${this.sessionId}] tick=${snapshot.tick} lagMs=${lagMs} clients=${this.clients.length}`,
       );
     }
+  }
+
+  /**
+   * Enter the fork phase (C-10): pick an unplayed level pair from the
+   * content pool and open the vote, then broadcast the resulting public
+   * state. Tallies update every tick thereafter via `broadcastForkState`.
+   */
+  private enterFork(): void {
+    this.sim.enterFork(getPlayablePool(), getForkLevelMeta);
+    this.broadcastPhaseChange("fork");
+    this.broadcastForkState();
+  }
+
+  private broadcastForkState(): void {
+    const state = this.sim.getForkPublicState();
+    const forkState: S2C_ForkState = {
+      type: "fork_state",
+      options: state.options,
+      tallies: state.tallies,
+      endsAtTick: state.endsAtTick,
+    };
+    this.broadcast("fork_state", forkState);
+  }
+
+  /**
+   * Enter the end phase and broadcast the authoritative ScoreReport
+   * (DESIGN §10.4, C06-T26). `Simulation.buildEndScoreReport` caches its
+   * result, so a second call here (there isn't one on this path, but the
+   * accept criteria require it) never re-runs the rules engine.
+   */
+  private enterEnd(): void {
+    const completionToken = issueToken();
+    const report = this.sim.buildEndScoreReport(this.sessionId, completionToken);
+
+    // Register the token with the lobby so POST /highscores can validate it.
+    const eligibleSeats = report.players
+      .filter((p) => p.eligibleForHighScore)
+      .map((p) => ({
+        seatId: p.seatId as SeatId,
+        character: p.character,
+        takeGp: p.takeGp,
+        sharePercent: p.sharePercent,
+      }));
+    this.lobby.registerCompletion(this.sessionId, eligibleSeats, completionToken);
+
+    this.broadcastPhaseChange("end_count");
+    const msg: S2C_ScoreReport = { type: "score_report", report };
+    this.broadcast("score_report", msg);
+  }
+
+  private broadcastPhaseChange(phase: S2C_PhaseChange["phase"]): void {
+    const msg: S2C_PhaseChange = { type: "phase_change", phase };
+    this.broadcast("phase_change", msg);
+    this.broadcast("snapshot", { type: "snapshot", snapshot: this.sim.buildSnapshot() });
+    this.broadcastSeatUpdate();
   }
 
   private broadcastEvents(events: GameEvent[]): void {
