@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import { BootScene } from "./scenes/BootScene";
+import { ManifestLoader, BootScene } from "./scenes/BootScene";
 import { mountDevLobby } from "./devLobby";
 
 /** Frozen logical resolution: 960×540, integer-friendly FIT + letterbox. */
@@ -16,7 +16,7 @@ const game = new Phaser.Game({
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
   },
-  scene: [BootScene],
+  scene: [ManifestLoader, BootScene],
 });
 
 // P2: DOM create/join UI overlays the canvas; on connect it starts GameScene.
