@@ -2,9 +2,9 @@ import Phaser from "phaser";
 import { getShellNavigator } from "../registry.js";
 
 /**
- * Splash + Start affordance (C01-T03). Character walk-in/idle and the real
- * background scroll are C-02 art hooks; this scene only wires the navigation
- * behavior so later presentation work can slot in without touching flow.
+ * Splash + Start affordance (C01-T03). Character walk-in/idle is a later
+ * C-02 art hook; this scene wires the navigation behavior and the real
+ * bg_title backdrop.
  */
 export class TitleScene extends Phaser.Scene {
   private onStart?: () => void;
@@ -15,6 +15,9 @@ export class TitleScene extends Phaser.Scene {
 
   create(): void {
     this.cameras.main.setBackgroundColor("#1a1626");
+    if (this.textures.exists("bg_title")) {
+      this.add.image(480, 270, "bg_title").setOrigin(0.5).setDepth(-10);
+    }
 
     this.add
       .text(480, 220, "DUNGEON HAUL", {

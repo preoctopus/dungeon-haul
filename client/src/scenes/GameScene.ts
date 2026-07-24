@@ -9,6 +9,21 @@ import type { SessionClient } from "../net/sessionClient.js";
 import type { LevelGeometry } from "../net/lobbyClient.js";
 
 const SEAT_COLORS = [0xff5555, 0x55aaff, 0x55dd55, 0xffcc44];
+const CHARACTERS = ["gnome", "sprite", "halfling", "dwarf"] as const;
+
+/** AnimState → char atlas anim suffix (PIPELINE guide §3.1 only defines these six). */
+const ANIM_KEY_MAP: Record<string, string> = {
+  idle: "idle",
+  run: "run",
+  jump: "jump",
+  falling: "jump",
+  duck: "duck",
+  throw: "duck",
+  drop: "duck",
+  push_trip: "hurt",
+  hurt: "hurt",
+  stunned: "stunned",
+};
 
 /** Map rules defId → atlas frame. Frames use tre_ prefix (PIPELINE guide). */
 function treasureFrame(defId: string): string {
@@ -27,6 +42,8 @@ export class GameScene extends Phaser.Scene {
   private hud!: Phaser.GameObjects.Text;
   private treasureSprites = new Map<string, Phaser.GameObjects.GameObject & { setPosition: (x: number, y: number) => unknown; setVisible: (v: boolean) => unknown; destroy: () => void }>();
   private carrySprites: Phaser.GameObjects.GameObject[] = [];
+  private haulerSprites = new Map<number, Phaser.GameObjects.Sprite>();
+  private haulerAnimsReady = false;
 
   constructor() {
     super("Game");
@@ -40,6 +57,7 @@ export class GameScene extends Phaser.Scene {
   create(): void {
     this.cameras.main.setBackgroundColor("#12101c");
     this.drawStatic();
+    this.createHaulerAnims();
     this.gfx = this.add.graphics();
     for (let i = 0; i < 4; i++) {
       this.labels.push(
@@ -50,6 +68,49 @@ export class GameScene extends Phaser.Scene {
       .text(8, 8, "", { fontSize: "12px", color: "#9fe" })
       .setScrollFactor(0)
       .setDepth(20);
+  }
+
+  private createHaulerAnims(): void {
+    for (const char of CHARACTERS) {
+      const key = `char_${char}`;
+      if (!this.textures.exists(key)) continue;
+      const specs: { suffix: string; end: number; frameRate: number; repeat: number }[] = [
+        { suffix: "idle", end: 3, frameRate: 7, repeat: -1 },
+        { suffix: "run", end: 5, frameRate: 12, repeat: -1 },
+        { suffix: "jump", end: 2, frameRate: 8, repeat: 0 },
+        { suffix: "duck", end: 1, frameRate: 6, repeat: -1 },
+        { suffix: "hurt", end: 2, frameRate: 10, repeat: 0 },
+        { suffix: "stunned", end: 3, frameRate: 8, repeat: -1 },
+      ];
+      for (const spec of specs) {
+        const animKey = `${char}-${spec.suffix}`;
+        if (this.anims.exists(animKey)) continue;
+        this.anims.create({
+          key: animKey,
+          frames: this.anims.generateFrameNames(key, {
+            prefix: `char_${char}_${spec.suffix}_`,
+            start: 0,
+            end: spec.end,
+          }),
+          frameRate: spec.frameRate,
+          repeat: spec.repeat,
+        });
+      }
+    }
+    this.haulerAnimsReady = true;
+  }
+
+  private getHaulerSprite(seatId: number, character: string): Phaser.GameObjects.Sprite | null {
+    const key = `char_${character}`;
+    if (!this.textures.exists(key)) return null;
+    let spr = this.haulerSprites.get(seatId);
+    if (!spr) {
+      spr = this.add.sprite(0, 0, key, `char_${character}_idle_0`).setOrigin(0.5, 1).setDepth(6);
+      this.haulerSprites.set(seatId, spr);
+    } else if (spr.texture.key !== key) {
+      spr.setTexture(key, `char_${character}_idle_0`);
+    }
+    return spr;
   }
 
   private drawStatic(): void {
@@ -150,18 +211,23 @@ export class GameScene extends Phaser.Scene {
       this.syncCarryIcons(localSeat, me?.carry);
     }
 
+    const activeSeats = new Set<number>();
     for (let seatId = 0; seatId < 4; seatId++) {
       let x: number | null = null;
       let y: number | null = null;
-      let facing = 1;
+      let facing: 1 | -1 = 1;
       let tag = "";
+      let anim = "idle";
       let carryN = 0;
+      const haulerState = snap?.haulers.find((h) => h.seatId === seatId);
+      const character = haulerState?.character ?? CHARACTERS[seatId % CHARACTERS.length]!;
       if (seatId === localSeat && local) {
         x = local.x;
         y = local.y;
         facing = local.facing;
         tag = "you";
-        carryN = snap?.haulers.find((h) => h.seatId === seatId)?.carry.length ?? 0;
+        anim = haulerState?.anim ?? "idle";
+        carryN = haulerState?.carry.length ?? 0;
       } else {
         const s = this.session.interpolator().sample(seatId, now);
         if (s) {
@@ -169,7 +235,8 @@ export class GameScene extends Phaser.Scene {
           y = s.y;
           facing = s.facing;
           tag = s.control === "ai" ? "ai" : (s.name ?? "human");
-          carryN = snap?.haulers.find((h) => h.seatId === seatId)?.carry.length ?? 0;
+          anim = s.anim;
+          carryN = haulerState?.carry.length ?? 0;
         }
       }
       const label = this.labels[seatId]!;
@@ -177,18 +244,35 @@ export class GameScene extends Phaser.Scene {
         label.setText("");
         continue;
       }
-      const color = SEAT_COLORS[seatId]!;
-      this.gfx.fillStyle(color, 1);
-      this.gfx.fillRect(x - kin.halfW, y - kin.halfH, kin.halfW * 2, kin.halfH * 2);
-      // facing pip
-      this.gfx.fillStyle(0xffffff, 1);
-      this.gfx.fillRect(x + facing * (kin.halfW - 4) - 2, y - 4, 4, 4);
+      activeSeats.add(seatId);
+
+      const sprite = this.haulerAnimsReady ? this.getHaulerSprite(seatId, character) : null;
+      if (sprite) {
+        sprite.setPosition(x, y + kin.halfH);
+        sprite.setFlipX(facing < 0);
+        const animKey = `${character}-${ANIM_KEY_MAP[anim] ?? "idle"}`;
+        if (this.anims.exists(animKey) && sprite.anims.currentAnim?.key !== animKey) {
+          sprite.play(animKey);
+        }
+      } else {
+        const color = SEAT_COLORS[seatId]!;
+        this.gfx.fillStyle(color, 1);
+        this.gfx.fillRect(x - kin.halfW, y - kin.halfH, kin.halfW * 2, kin.halfH * 2);
+        this.gfx.fillStyle(0xffffff, 1);
+        this.gfx.fillRect(x + facing * (kin.halfW - 4) - 2, y - 4, 4, 4);
+      }
       // carry stack height pip
       if (carryN > 0) {
         this.gfx.fillStyle(0xffd700, 1);
         this.gfx.fillRect(x - kin.halfW, y - kin.halfH - 6, Math.min(carryN, 6) * 4, 3);
       }
       label.setText(tag).setPosition(x - kin.halfW, y - kin.halfH - 12);
+    }
+    for (const [seatId, spr] of this.haulerSprites) {
+      if (!activeSeats.has(seatId)) {
+        spr.destroy();
+        this.haulerSprites.delete(seatId);
+      }
     }
 
     const cstate = this.session.connectionState;
