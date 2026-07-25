@@ -49,6 +49,24 @@ export async function startGameServer(opts: GameServerOptions = {}): Promise<Run
 
   // Colyseus game server (own listener → its matchmake routes just work).
   const wsHttpServer = createServer();
+
+  // Fail fast if the port is already in use. Node's http.Server emits 'error'
+  // on EADDRINUSE; without an error handler, that event becomes unhandled and
+  // colyseus.listen() hangs (never resolves or rejects). We attach a one-shot
+  // listener that rejects a promise, then race it against listen() so any
+  // failure surfaces within milliseconds instead of the next test timeout.
+  let _wsErr: NodeJS.ErrnoException | undefined;
+  const errorPromise = new Promise<void>((_resolve, reject) => {
+    const onErr = (err: NodeJS.ErrnoException) => {
+      _wsErr = err;
+      wsHttpServer.removeListener("error", onErr);
+      reject(
+        Object.assign(new Error(`dhaul server: ws port already in use (${err.code})`), { err }),
+      );
+    };
+    wsHttpServer.once("error", onErr);
+  });
+
   const colyseus = new Server({
     transport: new WebSocketTransport({ server: wsHttpServer }),
     greet: false,
@@ -58,7 +76,12 @@ export async function startGameServer(opts: GameServerOptions = {}): Promise<Run
     .define("haul_session", HaulSession)
     .on("create", () => activeRooms++)
     .on("dispose", () => activeRooms--);
-  await colyseus.listen(opts.wsPort ?? Number(process.env["WS_PORT"] ?? 2567));
+  const wsPortArg = opts.wsPort ?? Number(process.env["WS_PORT"] ?? 2567);
+
+  // Race listen() resolution against the 'error' event. If colyseus.listen()
+  // hangs on EADDRINUSE (as it does in older Node), errorPromise wins the race.
+  await Promise.race([colyseus.listen(wsPortArg), errorPromise]);
+
   const wsAddress = wsHttpServer.address();
   const wsPort = typeof wsAddress === "object" && wsAddress !== null ? wsAddress.port : 0;
   if (!wsUrl) wsUrl = `ws://localhost:${wsPort}`;

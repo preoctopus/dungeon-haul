@@ -20,9 +20,15 @@ import type {
   SeatStatus,
   SessionPhase,
 } from "@dhaul/protocol";
+import type {
+  ListHighScoresResponse,
+  SubmitHighScoreRequest,
+  SubmitHighScoreResponse,
+} from "@dhaul/protocol";
 import { JOIN_CODE_ALPHABET, JOIN_CODE_LENGTH } from "@dhaul/protocol";
 import { randomInt } from "node:crypto";
 import { hashToken, issueToken, verifyToken } from "../session/tokens.js";
+import { HighScoresStore, HighScoreError } from "../highScores/store.js";
 
 export class LobbyError extends Error {
   constructor(
@@ -68,6 +74,13 @@ export interface LobbyServiceOptions {
   now?: () => number;
 }
 
+/** Session-level completion record. One per ended session; shared across seats. */
+interface CachedCompletion {
+  sessionId: string;
+  /** All players eligible for high-score submission in this run. */
+  eligibleSeats: { seatId: SeatId; character: string; takeGp: number; sharePercent: number }[];
+}
+
 const DISPLAY_NAME_MAX = 16;
 const NAME_ALLOWED = /^[A-Za-z0-9 _.'-]+$/;
 
@@ -85,8 +98,13 @@ function normalizeName(raw: unknown): string {
 export class LobbyService {
   private readonly sessions = new Map<string, SessionRecord>();
   private readonly byJoinCode = new Map<string, string>();
+  /** completionToken (raw) → metadata for score-submission validation. */
+  private readonly completions = new Map<string, CachedCompletion>();
   private readonly opts: Required<Pick<LobbyServiceOptions, "levelsAfterHoard" | "reconnectGraceMs">> &
     LobbyServiceOptions;
+
+  /** High-score persistence (P4 in-memory mock; P5/C12 swaps in a DB). */
+  readonly highScores = new HighScoresStore();
 
   constructor(options: LobbyServiceOptions) {
     this.opts = {
@@ -302,5 +320,50 @@ export class LobbyService {
 
   get sessionCount(): number {
     return this.sessions.size;
+  }
+
+  // -------------------------------------------------------------------
+  // High scores (C01-T06, C12-T09/T16)
+  // -------------------------------------------------------------------
+
+  /** Register a completion token from an ended session. */
+  registerCompletion(
+    sessionId: string,
+    eligibleSeats: { seatId: SeatId; character: string; takeGp: number; sharePercent: number }[],
+    completionToken: string,
+  ): void {
+    this.completions.set(completionToken, { sessionId, eligibleSeats });
+    // Seed the store so duplicate-submission / "New!" tracking works.
+    for (const seat of eligibleSeats) {
+      this.highScores.registerCompletion(
+        sessionId,
+        seat.seatId,
+        seat.character,
+        seat.takeGp,
+        seat.sharePercent,
+        completionToken,
+      );
+    }
+  }
+
+  listHighScores(limit = 25): ListHighScoresResponse {
+    return this.highScores.list(limit);
+  }
+
+  submitHighScore(req: SubmitHighScoreRequest): SubmitHighScoreResponse {
+    // 1. Validate the completion token is known.
+    const cached = this.completions.get(req.completionToken);
+    if (!cached) {
+      throw new HighScoreError("UNAUTHORIZED", "unknown or expired completion token");
+    }
+
+    // 2. Validate seatId belongs to an eligible player in that session.
+    const match = cached.eligibleSeats.find((e) => e.seatId === req.seatId);
+    if (!match) {
+      throw new HighScoreError("UNAUTHORIZED", `seat ${req.seatId} not eligible`);
+    }
+
+    // 3. Delegate to the store (name validation, duplicate prevention).
+    return this.highScores.submit({ ...req });
   }
 }

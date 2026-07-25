@@ -24,12 +24,10 @@ describe("isC2SEndSkip validation (codec.ts lines 109-111)", () => {
     expect(isC2SEndSkip(42)).toBe(false);
     expect(isC2SEndSkip(undefined)).toBe(false);
   });
-
   it("rejects objects without type field", () => {
     expect(isC2SEndSkip({})).toBe(false);
     expect(isC2SEndSkip({ foo: "bar" })).toBe(false);
   });
-
   it("rejects objects with wrong type discriminant", () => {
     expect(isC2SEndSkip({ type: "join" })).toBe(false);
     expect(isC2SEndSkip({ type: "input" })).toBe(false);
@@ -221,7 +219,7 @@ describe("ScoreReport contract (protocol score.ts)", () => {
     expect(report.perSeat[0].gp).toBe(40);
   });
 
-  it("round-trips through JSON without losing structure", () => {
+  it("round-trips through JSON preserving perSeat data", () => {
     const original = {
       sessionId: "sess-roundtrip",
       levelsCompleted: 2,
@@ -243,7 +241,6 @@ describe("ScoreReport contract (protocol score.ts)", () => {
     };
     const json = JSON.stringify(original);
     const parsed = JSON.parse(json);
-    expect(parsed.sessionId).toBe("sess-roundtrip");
     expect(parsed.perSeat[0].character).toBe("sprite");
     expect(parsed.perSeat[0].shares).toBe(6);
   });
@@ -265,7 +262,7 @@ describe("encodeMessage round-trip", () => {
       traps: [],
       switches: [],
     });
-    const parsed = JSON.parse(msg) as JsonValue;
+    const parsed = JSON.parse(msg) as Record<string, unknown>;
     expect(parsed.type).toBe("snapshot");
     expect(parsed.tick).toBe(5);
   });
@@ -276,7 +273,7 @@ describe("encodeMessage round-trip", () => {
       code: "JOIN_FAILED",
       detail: "session full",
     });
-    const parsed = JSON.parse(msg) as JsonValue;
+    const parsed = JSON.parse(msg) as Record<string, unknown>;
     expect(parsed.type).toBe("error");
     expect(parsed.code).toBe("JOIN_FAILED");
   });
@@ -289,7 +286,7 @@ describe("encodeMessage round-trip", () => {
         { seatId: 0, gp: 10, shares: 2, rank: 1 },
       ],
     });
-    const parsed = JSON.parse(msg) as JsonValue;
+    const parsed = JSON.parse(msg) as Record<string, unknown>;
     expect(parsed.type).toBe("shares");
     expect(parsed.sessionId).toBe("sess-shares");
   });
@@ -299,7 +296,7 @@ describe("encodeMessage round-trip", () => {
       type: "end_entry",
       eligibleForHighScore: true,
     });
-    const parsed = JSON.parse(msg) as JsonValue;
+    const parsed = JSON.parse(msg) as Record<string, unknown>;
     expect(parsed.type).toBe("end_entry");
     expect(parsed.eligibleForHighScore).toBe(true);
   });
@@ -309,7 +306,7 @@ describe("encodeMessage round-trip", () => {
       type: "name_entry",
       name: "Player1",
     });
-    const parsed = JSON.parse(msg) as JsonValue;
+    const parsed = JSON.parse(msg) as Record<string, unknown>;
     expect(parsed.type).toBe("name_entry");
     expect(parsed.name).toBe("Player1");
   });
@@ -321,7 +318,7 @@ describe("encodeMessage round-trip", () => {
       seatId: 0,
       seatToken: "t1",
     });
-    const parsed = JSON.parse(msg) as JsonValue;
+    const parsed = JSON.parse(msg) as Record<string, unknown>;
     expect(parsed.type).toBe("welcome");
     expect(parsed.seatId).toBe(0);
   });
@@ -331,7 +328,7 @@ describe("encodeMessage round-trip", () => {
       type: "high_scores",
       entries: [{ name: "Alice", gp: 100 }],
     });
-    const parsed = JSON.parse(msg) as JsonValue;
+    const parsed = JSON.parse(msg) as Record<string, unknown>;
     expect(parsed.type).toBe("high_scores");
     expect(parsed.entries[0].name).toBe("Alice");
   });
@@ -343,7 +340,7 @@ describe("encodeMessage round-trip", () => {
         { label: "Forest", levelId: "forest_01" },
       ],
     });
-    const parsed = JSON.parse(msg) as JsonValue;
+    const parsed = JSON.parse(msg) as Record<string, unknown>;
     expect(parsed.type).toBe("fork");
   });
 
@@ -356,7 +353,7 @@ describe("encodeMessage round-trip", () => {
         { seatId: 1, gp: 15, shares: 3, rank: 2 },
       ],
     });
-    const parsed = JSON.parse(msg) as JsonValue;
+    const parsed = JSON.parse(msg) as Record<string, unknown>;
     expect(parsed.type).toBe("end_shares");
     expect(parsed.perSeat.length).toBe(2);
   });

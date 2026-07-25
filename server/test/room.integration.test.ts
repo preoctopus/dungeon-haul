@@ -19,11 +19,17 @@ import { startGameServer, type RunningGameServer } from "../src/gameServer.js";
 let server: RunningGameServer;
 
 beforeAll(async () => {
-  server = await startGameServer({ port: 0 });
+  // Both ports ephemeral — avoids EADDRINUSE when a dev server already holds
+  // the defaults (2567 / 8080). Without this, startGameServer hangs on
+  // colyseus.listen() and beforeAll times out at 20 s.
+  server = await startGameServer({ port: 0, wsPort: 0 });
 });
 
 afterAll(async () => {
-  await server.shutdown();
+  // Guarded against the case where beforeAll never resolved (server undefined).
+  // Without this, a startup failure produces two errors — one from the test,
+  // another from this hook — hiding the root cause.
+  await server?.shutdown();
 });
 
 interface Session {
