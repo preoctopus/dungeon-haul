@@ -299,6 +299,18 @@ export class HaulSession extends Room {
   private enterEnd(): void {
     const completionToken = issueToken();
     const report = this.sim.buildEndScoreReport(this.sessionId, completionToken);
+
+    // Register the token with the lobby so POST /highscores can validate it.
+    const eligibleSeats = report.players
+      .filter((p) => p.eligibleForHighScore)
+      .map((p) => ({
+        seatId: p.seatId as SeatId,
+        character: p.character,
+        takeGp: p.takeGp,
+        sharePercent: p.sharePercent,
+      }));
+    this.lobby.registerCompletion(this.sessionId, eligibleSeats, completionToken);
+
     this.broadcastPhaseChange("end_count");
     const msg: S2C_ScoreReport = { type: "score_report", report };
     this.broadcast("score_report", msg);
