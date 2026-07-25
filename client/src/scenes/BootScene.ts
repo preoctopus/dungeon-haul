@@ -16,23 +16,32 @@ export class BootScene extends Phaser.Scene {
     super("Boot");
   }
 
-  preload(): void {
-    this.load.json("asset_manifest", "assets/manifest.json");
+  preload(params: BootParams): void {
+    const manifest = params?.manifest ?? null;
+    if (!manifest) {
+      this.add.text(
+        10, 10,
+        "ERROR: no manifest supplied by ManifestLoader.",
+        { fontSize: "14px", color: "#f55" },
+      );
+      return;
+    }
+
+    const progress = this.add.text(10, 10, `Loading ${manifest.atlases.length + manifest.images.length} assets…`, { fontSize: "14px" });
+    this.load.on("progress", (value: number) => {
+      // value is a running fraction of the total bytes queued in THIS scene's loader.
+      progress.setText(`Loading assets… ${(Math.round(value * 100))}%`);
+    });
+
+    for (const a of manifest.atlases) {
+      this.load.atlas(a.key, a.texture, a.atlas);
+    }
+    for (const img of manifest.images) {
+      this.load.image(img.key, img.path);
+    }
   }
 
-  create(): void {
-    const manifest = this.cache.json.get("asset_manifest") as AssetManifest;
-    for (const atlasInfo of manifest.atlases) {
-      this.load.atlas(atlasInfo.key, atlasInfo.texture, atlasInfo.atlas);
-    }
-    for (const imgInfo of manifest.images) {
-      this.load.image(imgInfo.key, imgInfo.path);
-    }
-    this.load.once(Phaser.Loader.Events.COMPLETE, () => this.onAssetsLoaded());
-    this.load.start();
-  }
-
-  private onAssetsLoaded(): void {
+  create(_params: BootParams): void {
     this.cameras.main.setBackgroundColor("#1a1626");
     getShellNavigator(this).goTitle();
   }

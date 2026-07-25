@@ -74,3 +74,51 @@ export interface ScoreReport {
   /** Top totalHaulGp on board; omit → client skips fanfare (delta #3). */
   recordFanfareThresholdGp?: number;
 }
+
+// ---------------------------------------------------------------------------
+// REST high-score DTOs — docs/interfaces/lobby-and-scores.md §High scores.
+// These are wire shapes for the lobby API, not in-game netcode messages.
+// ---------------------------------------------------------------------------
+
+/** One row on the leaderboard; immutable once written. */
+export interface HighScoreRow {
+  id: string;
+  name: string;
+  character: CharacterId;
+  takeGp: number;
+  sharePercent: number;
+  totalHaulGp: number;
+  createdAt: string; // ISO-8601
+}
+
+/** `POST /api/v1/highscores` body. */
+export interface SubmitHighScoreRequest {
+  /** Opaque token issued by the session's ScoreReport. */
+  completionToken: string;
+  /** Seat that submitted (validated against the cached report). */
+  seatId: number;
+  /** Player name — sanitized client-side to ALLOWED_CHARS before send. */
+  name: string;
+}
+
+/** `POST /api/v1/highscores` response (201 on success). */
+export type SubmitHighScoreResponse = HighScoreRow;
+
+/** Last-run summary returned alongside the leaderboard. */
+export interface LastRunSummary {
+  sessionId: string;
+  entries: {
+    name?: string | null;
+    character: CharacterId;
+    takeGp: number;
+    sharePercent: number;
+  }[];
+}
+
+/** `GET /api/v1/highscores` response. */
+export interface ListHighScoresResponse {
+  top: HighScoreRow[];
+  lastRun?: LastRunSummary;
+  /** IDs of the three most-recently-added rows → "New!" tag on the client. */
+  recentNewIds: string[];
+}
